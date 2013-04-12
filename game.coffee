@@ -1,3 +1,8 @@
+# TODO:
+#  - Make distinguished world coordinates and grid coordintes systems.
+#    Level should contain block coordinates in it's own system, then to draw
+#    coordinates should be translated accordingly. Same for bot and blocks.
+
 Game = do ->
 
   luv = Luv
@@ -14,7 +19,7 @@ Game = do ->
   BOT_SPEED    = 100 # px/sec
 
   class Bot
-    constructor: (@posx, @posy) ->
+    constructor: (@posx, @posy, @level) ->
       @targetx = @posx
       @targety = @posy
       @onComplete = () ->
@@ -54,7 +59,7 @@ Game = do ->
       else if @targety > @posy
         @posy += delta
         if @targety < @posy
-          @posy = targety
+          @posy = @targety
 
     bottomPos: ->
       [ @posx, @posy + BLOCK_HEIGHT / 2 ]
@@ -69,6 +74,10 @@ Game = do ->
           console.log "ERROR: invalid dir: #{cmd.dir}"
       else if cmd.cmd == "down"
         console.log "down"
+        col = (@posx + BLOCK_WIDTH / 2) / BLOCK_WIDTH
+        console.log "bot col: #{col}"
+        [ topBlockPos, topBlock ] = @level.topBlock col
+        @targety = topBlockPos - BLOCK_HEIGHT / 2
       else
         console.log "ERROR: invalid cmd: #{cmd.cmd}"
 
@@ -95,12 +104,13 @@ Game = do ->
   class Level
     constructor: (@lvlData) ->
       console.log "loading level: #{@lvlData}"
-      @bot    = new Bot dimensions.width / 2 - BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2
-      # FIXME: this part should be removed   ^^^^^^^^^^^^^^^^^
+      @bot    = new Bot dimensions.width / 2 - BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2, this
+      # FIXME: this part should be removed  ^^^^^^^^^^^^^^^^^^
       @blocks = []
 
       for colIdx in [0..@lvlData.length-1]
         col = @lvlData[colIdx]
+        col_ = []
         for rowIdx in [0..col.length-1]
           row = col.charAt rowIdx
 
@@ -116,19 +126,27 @@ Game = do ->
           posy = dimensions.height - (rowIdx * BLOCK_HEIGHT - BLOCK_HEIGHT / 2)
 
           block = new Block posx, posy, color
-          @blocks.push block
+          col_.push block
+
+        @blocks.push col_
 
     update: (dt) ->
       @bot.update dt
 
-      for block in @blocks
-        block.update dt
+      for col in @blocks
+        for block in col
+          block.update dt
 
     draw: ->
       @bot.draw()
 
-      for block in @blocks
-        block.draw()
+      for col in @blocks
+        for block in col
+          block.draw()
+
+    topBlock: (col) ->
+      console.log "level col: #{col}"
+      [ dimensions.height - (@blocks[col].length - 1) * BLOCK_HEIGHT, @blocks[col][@blocks[col].length-1] ]
 
   currentLevel = null
 
