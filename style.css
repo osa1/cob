@@ -1,0 +1,40 @@
+body {
+  background-image: url("bg.png");
+  width: 980px;
+  margin: 0 auto 0 auto;
+
+  color: rgb(56, 54, 23);
+  font-size: 16px;
+  font-family: sans-serif;
+}
+
+div#target, div#game, div#editor-controllers {
+  background-color: #53777A;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  border-color: white;
+}
+
+div#editor {
+  margin-top: 1.5em;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+}
+
+div#editor-controllers {
+  margin-top: 0.5em;
+  padding: 0.4em;
+  font-size: 24px;
+}
+
+div#editor-controllers a {
+  text-decoration: none;
+  background-color: #1C2130;
+  color: white;
+  padding: 2px 6px 2px 6px;
+}
+
+div#editor-controllers a:href {
+
+}
+
+div#game {
+}

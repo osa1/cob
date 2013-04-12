@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>Drawing and updating</title>
+  </head>
+  <body>
+    <div id="target">
+      <p>
+        Target positions will be shown here.
+      </p>
+    </div>
+    <div id="game">
+      <canvas id="game-canvas"></canvas>
+    </div>
+    <div id="editor"> </div>
+    <div id="editor-controllers">
+      <a id="run-link">Run</a>
+    </div>
+
+
+  </body>
+
+  <!--load game library and the game -->
+  <script src="luv.js"></script>
+  <script src="game.js"></script>
+
+  <!-- load the editor -->
+  <script src="codemirror-compressed.js"></script>
+  <link rel="stylesheet" href="codemirror-3.11/lib/codemirror.css">
+
+  <!-- load parser -->
+  <script src="parser.js"></script>
+
+  <script type="text/javascript">
+    // OMG javascript sucks so hard ..
+    // var id = document.getElementById doesn't work for some reason, but this works fine.
+    // this is stupid.
+    var id = function (s) { return document.getElementById(s); }
+    var cm = CodeMirror(id("editor"));
+
+    var runBtn = id("run-link");
+    runBtn.onclick = function () {
+      console.log(parser.parse(cm.doc.getValue()));
+    };
+  </script>
+
+
+</html>
