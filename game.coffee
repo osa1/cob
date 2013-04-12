@@ -11,7 +11,7 @@ Game = do ->
 
   BLOCK_WIDTH  = dimensions.width / MAX_BLOCKS_WIDTH
   BLOCK_HEIGHT = dimensions.height / MAX_BLOCKS_HEIGHT
-  BOT_SPEED    = 10 # px/sec
+  BOT_SPEED    = 100 # px/sec
 
   class Bot
     constructor: (@posx, @posy) ->
@@ -25,7 +25,11 @@ Game = do ->
 
     draw: ->
       luv.graphics.setColor 255, 255, 255
-      luv.graphics.fillRectangle @posx+BLOCK_WIDTH/2, @posy, BLOCK_WIDTH, BLOCK_HEIGHT
+      luv.graphics.fillRectangle(
+        @posx + BLOCK_WIDTH / 2,
+        @posy - BLOCK_HEIGHT / 2,
+        BLOCK_WIDTH,
+        BLOCK_HEIGHT)
 
     update: (dt) ->
       if @targetx == @posx and @targety == @posy
@@ -33,25 +37,40 @@ Game = do ->
 
       delta = dt * BOT_SPEED
 
-      if targetx < posx
-        posx -= delta
-        if targetx > posx
-          posx = targetx
-      else if targetx > posx
-        posx += delta
-        if targetx < posx
-          posx = targetx
-      else if targety < posy
-        posy -= delta
-        if targety > posy
-          posy = targety
-      else if targety > posy
-        posy += delta
-        if targety < posy
-          posy = targety
+      # FIXME: this can cause flickering on slow systems,
+      # make pos = target if delta > diff
+      if @targetx < @posx
+        @posx -= delta
+        if @targetx > @posx
+          @posx = @targetx
+      else if @targetx > @posx
+        @posx += delta
+        if @targetx < @posx
+          @posx = @targetx
+      else if @targety < @posy
+        @posy -= delta
+        if @targety > @posy
+          @posy = @targety
+      else if @targety > @posy
+        @posy += delta
+        if @targety < @posy
+          @posy = targety
 
     bottomPos: ->
-      [ @posx + BLOCK_WIDTH / 2, @posy + BLOCK_WIDTH / 2 ]
+      [ @posx, @posy + BLOCK_HEIGHT / 2 ]
+
+    runCmd: (cmd) ->
+      if cmd.cmd == "move"
+        if cmd.dir == "left"
+          @targetx -= BLOCK_WIDTH
+        else if cmd.dir == "right"
+          @targetx += BLOCK_WIDTH
+        else
+          console.log "ERROR: invalid dir: #{cmd.dir}"
+      else if cmd.cmd == "down"
+        console.log "down"
+      else
+        console.log "ERROR: invalid cmd: #{cmd.cmd}"
 
 
   class Block
@@ -76,7 +95,8 @@ Game = do ->
   class Level
     constructor: (@lvlData) ->
       console.log "loading level: #{@lvlData}"
-      @bot    = new Bot dimensions.width / 2, 0
+      @bot    = new Bot dimensions.width / 2 - BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2
+      # FIXME: this part should be removed   ^^^^^^^^^^^^^^^^^
       @blocks = []
 
       for colIdx in [0..@lvlData.length-1]
@@ -115,6 +135,13 @@ Game = do ->
   loadLevel = (lvl) ->
     currentLevel = new Level lvl
 
+  runProgram = (program) ->
+    if currentLevel == null
+      console.log "load a level first"
+      return
+
+    currentLevel.bot.runCmd program[0].commands[0]
+
   luv.update = (dt) ->
     if currentLevel
       currentLevel.update dt
@@ -125,6 +152,7 @@ Game = do ->
 
   luv.run()
 
-  loadLevel: loadLevel
+  loadLevel: loadLevel,
+  runProgram: runProgram
 
 window.Game = Game
