@@ -1,101 +1,130 @@
+Game = do ->
 
-GRID_HEIGHT = 10
-GRID_WIDTH  = 8
+  luv = Luv
+          el: document.getElementById("game-canvas"),
+          width: 600,
+          height: 400
 
-class Level
-  constructor: (dimensions, @goal, @start) ->
-    @blockWidth  = dimensions.width / GRID_WIDTH
-    @blockHeight = dimensions.height / GRID_HEIGHT
+  dimensions = luv.graphics.getDimensions()
+  MAX_BLOCKS_WIDTH  = 10
+  MAX_BLOCKS_HEIGHT = 5
 
-    @map = @start
+  BLOCK_WIDTH  = dimensions.width / MAX_BLOCKS_WIDTH
+  BLOCK_HEIGHT = dimensions.height / MAX_BLOCKS_HEIGHT
+  BOT_SPEED    = 10 # px/sec
 
-  draw: ->
-    for columnIdx in [0..@map.length-1]
-      column = @map[columnIdx]
-      for blockIdx in [0..column.length-1]
-        char = column.charAt(blockIdx)
+  class Bot
+    constructor: (@posx, @posy) ->
+      @targetx = @posx
+      @targety = @posy
+      @onComplete = () ->
 
-        if char == "r"
-          color = [255, 0, 0]
-        else if char == "g"
-          color = [0, 255, 0]
-        else
-          color = [0, 0, 255]
+    moveTo: (x, y) ->
+      @targetx = x
+      @targety = y
 
-        luv.graphics.setColor color...
+    draw: ->
+      luv.graphics.setColor 255, 255, 255
+      luv.graphics.fillRectangle @posx+BLOCK_WIDTH/2, @posy, BLOCK_WIDTH, BLOCK_HEIGHT
 
-        luv.graphics.fillRectangle(
-          columnIdx * @blockWidth,
-          (GRID_HEIGHT - blockIdx - 1) * @blockHeight,
-          @blockWidth,
-          @blockHeight)
+    update: (dt) ->
+      if @targetx == @posx and @targety == @posy
+        return
 
-class Lift
-  constructor: (@posx, @posy) ->
-    @speedx = 10 # px / second
-    @speedy = 10
+      delta = dt * BOT_SPEED
 
-  draw: ->
-    luv.graphics.print "lift", @posx * GRID_WIDTH, @posy * GRID_HEIGHT
+      if targetx < posx
+        posx -= delta
+        if targetx > posx
+          posx = targetx
+      else if targetx > posx
+        posx += delta
+        if targetx < posx
+          posx = targetx
+      else if targety < posy
+        posy -= delta
+        if targety > posy
+          posy = targety
+      else if targety > posy
+        posy += delta
+        if targety < posy
+          posy = targety
 
-  update: (dt) ->
-
-
-
-luv = Luv
-        el: document.getElementById("game-canvas"),
-        width: 600,
-        height: 400
-
-level   = new Level luv.graphics.getDimensions(), ["rrr"], ["g", "r", "b"]
-bubbles = []
-
-rand = (min, max) ->
-  Math.floor (Math.random() * (max - min + 1)) + min
-
-class Bubble
-  constructor: ->
-    sd = luv.graphics.getDimensions()
-
-    @x  = rand 25, sd.width - 25
-    @y  = sd.height + rand 50, 100
-    @r  = rand 10, 40
-    @vy = rand 30, 80
+    bottomPos: ->
+      [ @posx + BLOCK_WIDTH / 2, @posy + BLOCK_WIDTH / 2 ]
 
 
-luv.load = ->
-  for i in [1..100]
-    bubbles.push new Bubble()
-  luv.graphics.setBackgroundColor 255, 255, 255
+  class Block
+    constructor: (@posx, @posy, @color) ->
+      @attached = null
 
-luv.update = (dt) ->
-  for i in [0..bubbles.length-1]
-    bubble = bubbles[i]
-    bubble.y -= bubble.vy * dt
+    draw: ->
+      luv.graphics.setColor @color...
+      luv.graphics.fillRectangle(
+        @posx + BLOCK_WIDTH / 2,
+        @posy - BLOCK_HEIGHT / 2,
+        BLOCK_WIDTH,
+        BLOCK_HEIGHT)
 
-    if bubble.y < -50
-      bubbles[i] = new Bubble()
+    update: ->
+      if @attached
+        [bottomx, bottomy] = @attached.bottomPos()
+        @posx = bottomx
+        @posy = bottomy + BLOCK_WIDTH / 2
 
-luv.draw = () ->
-  level.draw()
 
-  #sd = luv.graphics.getDimensions()
-  #for i in [0..bubbles.length-1]
-    #bubble = bubbles[i]
-    #luv.graphics.setColor 255, 98, 0
-    #luv.graphics.fillCircle bubble.x, bubble.y, bubble.r
+  class Level
+    constructor: (@lvlData) ->
+      console.log "loading level: #{@lvlData}"
+      @bot    = new Bot dimensions.width / 2, 0
+      @blocks = []
 
-    #luv.graphics.setLineWidth 255, 255, 200
-    #luv.graphics.setColor 255, 255, 200
-    #luv.graphics.strokeCircle bubble.x, bubble.y, bubble.r
+      for colIdx in [0..@lvlData.length-1]
+        col = @lvlData[colIdx]
+        for rowIdx in [0..col.length-1]
+          row = col.charAt rowIdx
 
-    #luv.graphics.fillCircle(
-      #bubble.x - bubble.r / 2,
-      #bubble.y - bubble.r / 2.5,
-      #bubble.r / 3)
+          color =
+            if row == "r"
+              [ 255, 0, 0 ]
+            else if row == "g"
+              [ 0, 255, 0 ]
+            else
+              [ 0, 0, 255 ]
 
-    #luv.graphics.setColor(255, 255, 255)
-    #fps = Math.round luv.timer.getFPS()
-    #luv.graphics.print "FPS: " + fps, sd.width - 40, 10
+          posx = colIdx * BLOCK_WIDTH - BLOCK_WIDTH / 2
+          posy = dimensions.height - (rowIdx * BLOCK_HEIGHT - BLOCK_HEIGHT / 2)
 
-luv.run()
+          block = new Block posx, posy, color
+          @blocks.push block
+
+    update: (dt) ->
+      @bot.update dt
+
+      for block in @blocks
+        block.update dt
+
+    draw: ->
+      @bot.draw()
+
+      for block in @blocks
+        block.draw()
+
+  currentLevel = null
+
+  loadLevel = (lvl) ->
+    currentLevel = new Level lvl
+
+  luv.update = (dt) ->
+    if currentLevel
+      currentLevel.update dt
+
+  luv.draw = ->
+    if currentLevel
+      currentLevel.draw()
+
+  luv.run()
+
+  loadLevel: loadLevel
+
+window.Game = Game
