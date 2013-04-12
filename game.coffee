@@ -22,7 +22,8 @@ Game = do ->
     constructor: (@posx, @posy, @level) ->
       @targetx = @posx
       @targety = @posy
-      @onComplete = () ->
+      @onComplete = ->
+      @attachedTo = null
 
     moveTo: (x, y) ->
       @targetx = x
@@ -61,6 +62,10 @@ Game = do ->
         if @targety < @posy
           @posy = @targety
 
+      if @targetx == @posx and @targety == @posy
+        @onComplete()
+        @onComplete = ->
+
     bottomPos: ->
       [ @posx, @posy + BLOCK_HEIGHT / 2 ]
 
@@ -77,7 +82,22 @@ Game = do ->
         col = (@posx + BLOCK_WIDTH / 2) / BLOCK_WIDTH
         console.log "bot col: #{col}"
         [ topBlockPos, topBlock ] = @level.topBlock col
-        @targety = topBlockPos - BLOCK_HEIGHT / 2
+        if @attachedTo == null
+
+          @onComplete = =>
+            topBlock.attach this
+            @targety = BLOCK_HEIGHT / 2
+            @attachedTo = topBlock
+
+          @targety = topBlockPos - BLOCK_HEIGHT / 2
+        else
+          @onComplete = =>
+            topBlock.detach()
+            @targety = BLOCK_HEIGHT / 2
+            @atachedTo = null
+
+          @targety = topBlockPos - BLOCK_HEIGHT
+
       else
         console.log "ERROR: invalid cmd: #{cmd.cmd}"
 
@@ -99,6 +119,12 @@ Game = do ->
         [bottomx, bottomy] = @attached.bottomPos()
         @posx = bottomx
         @posy = bottomy + BLOCK_WIDTH / 2
+
+    attach: (obj) ->
+      @attached = obj
+
+    detach: () ->
+      @attached = null
 
 
   class Level
