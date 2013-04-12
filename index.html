@@ -42,8 +42,12 @@
 
     var runBtn = id("run-link");
     runBtn.onclick = function () {
-      console.log(parser.parse(cm.doc.getValue()));
+      var val = parser.parse(cm.doc.getValue());
+      console.log(val);
+      Game.runProgram(val);
     };
+
+    Game.loadLevel([ "rgb", "rrr", "ggg", "rgb", "bgr", "rgb", "bbb", "rrr", "ggg" ]);
   </script>
 
 
