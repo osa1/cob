@@ -12,6 +12,12 @@ Game = do ->
       @onComplete = ->
       @attachedTo = null
 
+      @program = null
+      @_actionHistory = []
+      @_currentAction = null
+      @_actionQueue   = []
+      @_idle = true
+
     moveTo: (x, y) ->
       @targetx = x
       @targety = y
@@ -24,7 +30,13 @@ Game = do ->
         @attachedTo.draw()
 
     update: (dt) ->
-      if @targetx == @posx and @targety == @posy
+      console.log "@_idle: #{@_idle}"
+      if @targetx == @posx and @targety == @posy and @_idle
+        @_actionHistory.push @_currentAction
+        @_currentAction = @_actionQueue[0]
+        @_actionQueue = @_actionQueue.slice 1
+        if @_currentAction
+          @runCmd @_currentAction
         return
 
       delta = dt * BOT_SPEED
@@ -55,7 +67,6 @@ Game = do ->
 
       if @targetx == @posx and @targety == @posy
         @onComplete()
-        @onComplete = ->
 
       if @attachedTo
         @attachedTo.update dt
@@ -63,12 +74,27 @@ Game = do ->
     bottomPos: ->
       [ @posx, @posy + BLOCK_HEIGHT / 2 ]
 
+    _setIdle: =>
+      console.log "bot is idle"
+      @_idle = true
+      @onComplete = ->
+
+    setProgram: (program) ->
+      if @program
+        throw new Error "program is already set"
+      @program = program
+      @_actionQueue = program[0].commands
+
     runCmd: (cmd) ->
+      @_idle = false
+
       if cmd.cmd == "move"
         if cmd.dir == "left"
           @targetx -= BLOCK_WIDTH
+          @onComplete = @_setIdle
         else if cmd.dir == "right"
           @targetx += BLOCK_WIDTH
+          @onComplete = @_setIdle
         else
           console.log "ERROR: invalid dir: #{cmd.dir}"
       else if cmd.cmd == "down"
@@ -79,19 +105,23 @@ Game = do ->
 
         if @attachedTo == null
           @onComplete = =>
+            console.log "action completed"
             @attachedTo = topBlock
             @attachedTo.attach this
             @targety = BLOCK_HEIGHT / 2
             @level.pop col
+            @onComplete = @_setIdle
 
           @targety = topBlockPos - BLOCK_HEIGHT / 2
 
         else
           @onComplete = =>
+            console.log "action completed"
             @targety = BLOCK_HEIGHT / 2
             @attachedTo.detach()
             @level.push col, @attachedTo
             @attachedTo = null
+            @onComplete = @_setIdle
 
           @targety = topBlockPos - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT
 
@@ -109,7 +139,6 @@ Game = do ->
 
     update: ->
       if @attached
-        console.log "attached"
         [bottomx, bottomy] = @attached.bottomPos()
         @posx = bottomx
         @posy = bottomy + BLOCK_WIDTH / 2
@@ -184,7 +213,7 @@ Game = do ->
       console.log "load a level first"
       return
 
-    currentLevel.bot.runCmd program[0].commands[0]
+    currentLevel.bot.setProgram program
 
   luv.update = (dt) ->
     if currentLevel
