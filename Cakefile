@@ -29,5 +29,5 @@ task 'clean', '', (options) ->
   cp.spawn 'rm', [ '-rf', GAME_OUTPUT ]
 
 task 'build:all', 'rebuild game and parser', (options) ->
-  tasks['build:parser'].action options
-  tasks['build:game'].action options
+  invoke 'build:parser'
+  invoke 'build:game'
