@@ -54,7 +54,7 @@ Game = do ->
 
       if @attachedTo
         @attachedTo.update dt
-          
+
     bottomPos: ->
       [ @posx, @posy + BLOCK_HEIGHT / 2 ]
 
@@ -71,22 +71,24 @@ Game = do ->
         col = colOf @posx
         console.log "bot col: #{col}"
         [ topBlockPos, topBlock ] = @level.topBlock col
-        if @attachedTo == null
 
+        if @attachedTo == null
           @onComplete = =>
-            topBlock.attach this
-            @targety = BLOCK_HEIGHT / 2
             @attachedTo = topBlock
+            @attachedTo.attach this
+            @targety = BLOCK_HEIGHT / 2
             @level.pop col
 
           @targety = topBlockPos - BLOCK_HEIGHT / 2
+
         else
           @onComplete = =>
-            topBlock.detach()
             @targety = BLOCK_HEIGHT / 2
-            @atachedTo = null
+            @attachedTo.detach()
+            @level.push col, @attachedTo
+            @attachedTo = null
 
-          @targety = topBlockPos - BLOCK_HEIGHT / 2
+          @targety = topBlockPos - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT
 
       else
         console.log "ERROR: invalid cmd: #{cmd.cmd}"
@@ -102,6 +104,7 @@ Game = do ->
 
     update: ->
       if @attached
+        console.log "attached"
         [bottomx, bottomy] = @attached.bottomPos()
         @posx = bottomx
         @posy = bottomy + BLOCK_WIDTH / 2
@@ -109,7 +112,7 @@ Game = do ->
     attach: (obj) ->
       @attached = obj
 
-    detach: () ->
+    detach: () =>
       @attached = null
 
 
@@ -162,6 +165,9 @@ Game = do ->
 
     pop: (col) ->
       @blocks[col].pop()
+
+    push: (col, block) ->
+      @blocks[col].push block
 
   currentLevel = null
 
