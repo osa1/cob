@@ -83,7 +83,43 @@ EngineModule = do ->
                     return f
             return null
 
+        _cmdDown: ->
+            if @botBlock and @level.tryPush @botPos, @botBlock
+                @ip++
+                @botBlock = null
+                return true
+            else if not @botBlock
+                popped = @level.tryPop @botPos
+                if popped
+                    @botBlock = popped
+                    @ip++
+                    return true
+
+        _cmdMoveLeft: ->
+            if @botPos > 0
+                @botPos--
+                @ip++
+                return true
+
+        _cmdMoveRight: ->
+            if @botPos < @_width - 1
+                @botPos++
+                @ip++
+                return true
+
+        _cmdCall: (funName) ->
+            fun = @_lookupFun funName
+            if fun
+                @currentFun = fun
+                @ip = 0
+                return true
+            else
+                throw new Error "function is not defined: #{instr.function}"
+
         step: ->
+            console.log "step"
+
+            console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
             if @ip > @currentFun.commands.length - 1
                 throw "halt"
                 return
@@ -91,35 +127,20 @@ EngineModule = do ->
             instr = @currentFun.commands[@ip]
             if instr.cmd == "move"
                 dir = instr.dir
-                if dir == "left" and @botPos > 0
-                    @botPos--
-                    @history.push instr
-                    @ip++
-                else if dir == "right" and @botPos < @_width - 1
-                    @botPos++
-                    @history.push instr
-                    @ip++
+                if dir == "left"
+                    if @_cmdMoveLeft()
+                        @history.push instr
+                else if dir == "right"
+                    if @_cmdMoveRight()
+                        @history.push instr
 
             else if instr.cmd == "down"
-                if @botBlock and @level.tryPush @botPos, @botBlock
+                if @_cmdDown()
                     @history.push instr
-                    @ip++
-                    @botBlock = null
-                else if not @botBlock
-                    popped = @level.tryPop @botPos
-                    if popped
-                        @botBlock = popped
-                        @history.push instr
-                        @ip++
 
             else if instr.cmd == "call"
-                fun = @_lookupFun instr.function
-                if fun
+                if @_cmdCall instr.function
                     @history.push cmd: "call", function: istr.function, from: @currentFunction.id
-                    @currentFun = fun
-                    @ip = 0
-                else
-                    throw new Error "function is not defined: #{instr.function}"
 
             else
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
