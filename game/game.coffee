@@ -18,11 +18,7 @@ Game = do ->
 
     draw: ->
       luv.graphics.setColor 255, 255, 255
-      luv.graphics.fillRectangle(
-        @posx + BLOCK_WIDTH / 2,
-        @posy - BLOCK_HEIGHT / 2,
-        BLOCK_WIDTH,
-        BLOCK_HEIGHT)
+      fillRect @posx, @posy
 
     update: (dt) ->
       if @targetx == @posx and @targety == @posy
@@ -95,11 +91,7 @@ Game = do ->
 
     draw: ->
       luv.graphics.setColor @color...
-      luv.graphics.fillRectangle(
-        @posx + BLOCK_WIDTH / 2,
-        @posy - BLOCK_HEIGHT / 2,
-        BLOCK_WIDTH,
-        BLOCK_HEIGHT)
+      fillRect @posx, @posy
 
     update: ->
       if @attached
@@ -117,8 +109,7 @@ Game = do ->
   class Level
     constructor: (@lvlData) ->
       console.log "loading level: #{@lvlData}"
-      @bot    = new Bot SCREEN_WIDTH / 2 - BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2, this
-      # FIXME: this part should be removed  ^^^^^^^^^^^^^^^^^^
+      @bot    = new Bot SCREEN_WIDTH / 2, BLOCK_HEIGHT / 2, this
       @blocks = []
 
       for colIdx in [0..@lvlData.length-1]
@@ -135,7 +126,7 @@ Game = do ->
             else
               [ 0, 0, 255 ]
 
-          posx = colIdx * BLOCK_WIDTH - BLOCK_WIDTH / 2
+          posx = colIdx * BLOCK_WIDTH + BLOCK_WIDTH / 2
           posy = SCREEN_HEIGHT - (rowIdx * BLOCK_HEIGHT - BLOCK_HEIGHT / 2)
 
           block = new Block posx, posy, color
