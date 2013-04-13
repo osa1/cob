@@ -18,5 +18,7 @@ command
       { return { cmd: 'move', dir: dir }; }
   / ws* "down"
       { return { cmd: 'down' }; }
+  / ws* "call" ws+ id:id
+      { return { cmd: 'call', program: id }; }
 
 dir = "left" / "right"

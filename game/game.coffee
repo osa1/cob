@@ -30,7 +30,7 @@ Game = do ->
         @attachedTo.draw()
 
     update: (dt) ->
-      console.log "@_idle: #{@_idle}"
+      #console.log "@_idle: #{@_idle}"
       if @targetx == @posx and @targety == @posy and @_idle
         @_actionHistory.push @_currentAction
         @_currentAction = @_actionQueue[0]
@@ -52,7 +52,7 @@ Game = do ->
           @posx = @targetx
         else
           @posx += delta
-        
+
       else if @targety < @posy
         if @targety > @posy - delta
           @posy = @targety
@@ -125,8 +125,23 @@ Game = do ->
 
           @targety = topBlockPos - BLOCK_HEIGHT / 2 - BLOCK_HEIGHT
 
+      else if cmd.cmd == "call"
+        console.log "call"
+        program = null
+        for p in @program
+          if p.id == cmd.program
+            program = p
+            break
+
+        if p
+          @_actionQueue = program.commands
+          @_setIdle()
+        else
+          throw new Error "invalid program: #{cmd.program}"
+
+
       else
-        console.log "ERROR: invalid cmd: #{cmd.cmd}"
+        throw new Error "invalid cmd: #{cmd.cmd}"
 
 
   class Block
