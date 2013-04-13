@@ -1,115 +1,146 @@
-Engine = do ->
+EngineModule = do ->
 
-  # XXX: Commands' well-formedness should be guaranteed by the parser.
+    # make column heights in a map equal by adding `null` spaces.
+    fixColHeights = (lvlData) ->
+        maxHeight = 0
+        for col in lvlData
+            maxHeight = Math.max col.length, maxHeight
 
-  level   = {}
-  currentLevel = null
-  history = []
-  program = null
-  currentFunction = null
-  ip = null
+        ret = []
+        for col in lvlData
+            newCol = []
+            for r in col
+                newCol.push r
 
-  # bot state
-  bot = null
+            if maxHeight != col.length
+                for i in [0..maxHeight - col.length - 1]
+                    newCol.push null
+            ret.push newCol
+        return ret
 
-  loadLevel = (start, target) ->
-    throwSizeError = ->
-      throw new Error "start and target maps are not same size."
 
-    if start.length != target.length
-      throwSizeError()
-      
-    for i in [0..start.length-1]
-      if start[i].length != target[i].length
-        throwSizeError()
+    class Level
 
-    level = start: start, target: target
-    currentLevel = start
+        constructor: (@stage, @goal) ->
+            @_width  = @stage.length
+            @_height = @stage[0].length
 
-  loadProgram = (_program) ->
-    if not currentLevel
-      throw new Error "load a level first"
+            for col in @stage
+                if col.length != @_height
+                    throw new Error "Level data is not well-formed. (different col heights)"
 
-    if _program.length == 0
-      throw new Error "program has no functions."
+        getHeight: -> return @_height
 
-    history = []
-    program = _program
-    currentFunction = program[0]
-    ip = 0
+        getWidth: -> return @_width
 
-    bot = posx: (Math.floor level.start.length / 2), block: null
+        tryPop: (col) ->
+            assert 0 <= col < @_width, "pop: col is out of bounds: #{col}"
 
-  step = ->
-    if not currentFunction
-      throw new Error "currentFunction is null"
+            colData = @stage[col]
+            for i in [@_height-1..0] by -1
+                if colData[i] != null
+                    r = colData[i]
+                    colData[i] = null
+                    return r
+            return null
 
-    if ip >= currentFunction.commands.length
-      throw new Error "halt"
+        tryPush: (col, val) ->
+            assert 0 <= col < @_width, "tryPush: col is out of bounds: #{col}"
 
-    cmd = currentFunction.commands[ip++]
+            colData = @stage[col]
+            if colData[@_height-1]
+                # col is full
+                return false
 
-    if cmd.cmd == "move"
-      if cmd.dir == "right"
-        if bot.posx < level.start.length - 1
-          bot.posx++
-          history.push cmd
-        else
-          console.log "wall"
-      else
-        if bot.posx > 0
-          bot.posx--
-          history.push cmd
-        else
-          console.log "wall"
+            for i in [@_height-2..0] by -1
+                if colData[i] != null
+                    colData[i+1] = val
+                    return true
+                else if i == 0
+                    # col is empty
+                    colData[0] = val
+                    return true
 
-    else if cmd.cmd == "down"
-      col = currentLevel[bot.posx]
-      if bot.block
-        for i in [col.length-1..0] by -1
-          if col[i]
-            if i < col.length - 2
-              col[i+1] = bot.block
-              bot.block = null
-              history.push cmd
-              return
+            return false
+
+
+    class GameEngine
+
+        constructor: (@level, @program) ->
+            assert @program.length != 0, "programs should have at least one function."
+
+            @history    = []
+            @ip         = 0 # instruction pointer
+            @currentFun = @program[0]
+
+            # bot state
+            @botPos     = Math.floor @level.getWidth() / 2
+            @botBlock   = null
+
+        _lookupFun: (funName) ->
+            for f in @program
+                if f.function == funName
+                    return f
+            return null
+
+        step: ->
+            if @ip > @currentFun.commands.length - 1
+                throw "halt"
+                return
+
+            instr = @currentFun.commands[@ip]
+            if instr.cmd == "move"
+                dir = instr.dir
+                if dir == "left" and @botPos > 0
+                    @botPos--
+                    @history.push instr
+                    @ip++
+                else if dir == "right" and @botPos < @_width - 1
+                    @botPos++
+                    @history.push instr
+                    @ip++
+
+            else if instr.cmd == "down"
+                if @botBlock and @level.tryPush @botPos, @botBlock
+                    @history.push instr
+                    @ip++
+                    @botBlock = null
+                else if not @botBlock
+                    popped = @level.tryPop @botPos
+                    if popped
+                        @botBlock = popped
+                        @history.push instr
+                        @ip++
+
+            else if instr.cmd == "call"
+                fun = @_lookupFun instr.function
+                if fun
+                    @history.push cmd: "call", function: istr.function, from: @currentFunction.id
+                    @currentFun = fun
+                    @ip = 0
+                else
+                    throw new Error "function is not defined: #{instr.function}"
+
             else
-              console.log "col is full"
-              return
-        console.log "col is empty"
-        col[0] = bot.block
-        bot.block = null
-        history.push cmd
+                throw new Error "unimplemedted cmd: #{instr.cmd}"
 
-      else
-        for i in [col.length-1..0] by -1
-          if col[i]
-            bot.block = col[i]
-            col[i] = null
-            history.push cmd
-            return
-        console.log "col is empty"
-        return
+        stepBack: ->
+            # TODO
+            throw new Error "stepBack not yet implemented"
 
-    else if cmd.cmd == "call"
-      fun = null
-      for f in program
-        if f.id = cmd.id
-          fun = f
-          break
-      if not fun
-        throw new Error "no function named #{cmd.id} in program"
-      history.push cmd: "call", id: cmd.id, before: currentFunction.id
-      currentFunction = fun
-      ip = 0
+        fastForward: ->
+            try
+                while true
+                    @step()
+            catch error
+                if error != "halt"
+                    throw error
 
-    else
-      throw new error "Unimplemented cmd: #{cmd.cmd}"
 
-  loadLevel: loadLevel,
-  loadProgram: loadProgram,
-  step: step,
-  stepBack: null,
-  fastForward: null
+    Level: Level,
+    GameEngine: GameEngine,
+    fixColHeights: fixColHeights
 
-window.Engine = Engine
+window.Level         = EngineModule.Level
+window.GameEngine    = EngineModule.GameEngine
+window.fixColHeights = EngineModule.fixColHeights
