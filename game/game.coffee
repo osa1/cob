@@ -29,24 +29,29 @@ Game = do ->
 
       delta = dt * BOT_SPEED
 
-      # FIXME: this can cause flickering on slow systems,
-      # make pos = target if delta > diff
       if @targetx < @posx
-        @posx -= delta
-        if @targetx > @posx
+        if @targetx > @posx - delta
           @posx = @targetx
+        else
+          @posx -= delta
+
       else if @targetx > @posx
-        @posx += delta
-        if @targetx < @posx
+        if @targetx < @pox + delta
           @posx = @targetx
+        else
+          @posx += delta
+        
       else if @targety < @posy
-        @posy -= delta
-        if @targety > @posy
+        if @targety > @posy - delta
           @posy = @targety
+        else
+          @posy -= delta
+
       else if @targety > @posy
-        @posy += delta
-        if @targety < @posy
+        if @targety < @posy + delta
           @posy = @targety
+        else
+          @posy += delta
 
       if @targetx == @posx and @targety == @posy
         @onComplete()
