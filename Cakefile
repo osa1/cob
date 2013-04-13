@@ -23,7 +23,7 @@ task 'build:game', 'rebuild the game', (options) ->
 
 task 'build:parser', 'rebuild the parser', (options) ->
   mkTargetDir()
-  setStreams(cp.spawn 'jison', [ (path.join GAME_SOURCE, 'parser.jison'), '-o', (path.join GAME_OUTPUT, 'parser.js') ])
+  setStreams(cp.spawn 'pegjs', [ "-e", "parser", (path.join GAME_SOURCE, 'parser.pegjs'), (path.join GAME_OUTPUT, 'parser.js') ])
 
 task 'clean', '', (options) ->
   cp.spawn 'rm', [ '-rf', GAME_OUTPUT ]
