@@ -66,7 +66,7 @@ GuiModule = do ->
 
         draw: ->
             luv.graphics.setColor @color...
-            fillRect @posx, @posy
+            fillRect @posx, @posy - BLOCK_HEIGHT # FIXME: last part should be removed
 
         update: (dt) ->
             if @attached
@@ -87,12 +87,17 @@ GuiModule = do ->
             @map = []
 
         setLevel: (mapData) ->
+            @mapHeight = mapData.getHeight()
+            @mapHeight_blocks = @mapHeight / BLOCK_HEIGHT
+            @mapWidth_blocks = @mapWidth / BLOCK_WIDTH
+
+            @mapWidth  = mapData.getWidth()
             @map = []
             for colIdx in [0..mapData.stage.length-1]
                 col = mapData.stage[colIdx]
                 newCol = []
                 for rowIdx in [0..col.length-1]
-                    row = col[row]
+                    row = col[rowIdx]
                     if row == null
                         break
                     else
@@ -114,15 +119,40 @@ GuiModule = do ->
 
             @bot = new Bot ((@map.length / 2) * BLOCK_WIDTH + BLOCK_WIDTH / 2), BLOCK_HEIGHT / 2
 
+            console.log @bot
+            console.log @map
+
         draw: ->
             for col in @map
-                for row in @col
+                for row in col
                     row.draw()
+
+            @bot.draw()
 
         update: (dt) ->
             for col in @map
                 for row in col
                     row.update dt
+
+            @bot.update dt
+
+        # FIXME
+        pick: ->
+            #col = colOf @bot.posx
+            #@bot.moveGridDelta 0, @mapHeight_blocks - col.length
+            #@bot.onComplete = ->
+                #@bot.attach @map[col].pop()
+                #@bot.attachedTo.attach @bot
+
+        drop: ->
+
+        moveLeft: ->
+            console.log "gui.moveLeft"
+            @bot.moveGridDelta -1, 0
+
+        moveRight: ->
+            console.log "gui.moveRight"
+            @bot.moveGridDelta 1, 0
 
     Gui: Gui
 
