@@ -1,4 +1,4 @@
-start = programs
+start = functions
 
 ws = [\t\n\r ]
 
@@ -6,10 +6,10 @@ id
   = id:[A-Za-z0-9]+
       { return id.join(""); }
 
-programs
-  = program+
+functions
+  = function+
 
-program
+function
   = ws* id:id ws* ":" ws* commands:command+
       { return { id: id, commands: commands }; }
 
@@ -19,6 +19,6 @@ command
   / ws* "down"
       { return { cmd: 'down' }; }
   / ws* "call" ws+ id:id
-      { return { cmd: 'call', program: id }; }
+      { return { cmd: 'call', function: id }; }
 
 dir = "left" / "right"
