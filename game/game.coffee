@@ -86,7 +86,7 @@ Game = do ->
             @targety = BLOCK_HEIGHT / 2
             @atachedTo = null
 
-          @targety = topBlockPos - BLOCK_HEIGHT
+          @targety = topBlockPos - BLOCK_HEIGHT / 2
 
       else
         console.log "ERROR: invalid cmd: #{cmd.cmd}"
