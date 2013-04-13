@@ -5,19 +5,6 @@
 
 Game = do ->
 
-  luv = Luv
-          el: document.getElementById("game-canvas"),
-          width: 600,
-          height: 400
-
-  dimensions = luv.graphics.getDimensions()
-  MAX_BLOCKS_WIDTH  = 10
-  MAX_BLOCKS_HEIGHT = 5
-
-  BLOCK_WIDTH  = dimensions.width / MAX_BLOCKS_WIDTH
-  BLOCK_HEIGHT = dimensions.height / MAX_BLOCKS_HEIGHT
-  BOT_SPEED    = 100 # px/sec
-
   class Bot
     constructor: (@posx, @posy, @level) ->
       @targetx = @posx
@@ -130,7 +117,7 @@ Game = do ->
   class Level
     constructor: (@lvlData) ->
       console.log "loading level: #{@lvlData}"
-      @bot    = new Bot dimensions.width / 2 - BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2, this
+      @bot    = new Bot SCREEN_WIDTH / 2 - BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2, this
       # FIXME: this part should be removed  ^^^^^^^^^^^^^^^^^^
       @blocks = []
 
@@ -149,7 +136,7 @@ Game = do ->
               [ 0, 0, 255 ]
 
           posx = colIdx * BLOCK_WIDTH - BLOCK_WIDTH / 2
-          posy = dimensions.height - (rowIdx * BLOCK_HEIGHT - BLOCK_HEIGHT / 2)
+          posy = SCREEN_HEIGHT - (rowIdx * BLOCK_HEIGHT - BLOCK_HEIGHT / 2)
 
           block = new Block posx, posy, color
           col_.push block
@@ -172,7 +159,7 @@ Game = do ->
 
     topBlock: (col) ->
       console.log "level col: #{col}"
-      [ dimensions.height - (@blocks[col].length - 1) * BLOCK_HEIGHT, @blocks[col][@blocks[col].length-1] ]
+      [ SCREEN_HEIGHT - (@blocks[col].length - 1) * BLOCK_HEIGHT, @blocks[col][@blocks[col].length-1] ]
 
   currentLevel = null
 
