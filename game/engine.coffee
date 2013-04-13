@@ -29,9 +29,11 @@ EngineModule = do ->
                 if col.length != @_height
                     throw new Error "Level data is not well-formed. (different col heights)"
 
-        getHeight: -> return @_height
+        getHeight: ->
+            return @_height
 
-        getWidth: -> return @_width
+        getWidth: ->
+            return @_width
 
         tryPop: (col) ->
             assert 0 <= col < @_width, "pop: col is out of bounds: #{col}"
@@ -66,8 +68,17 @@ EngineModule = do ->
 
     class GameEngine
 
-        constructor: (@level, @program) ->
+        constructor: (@level, @program, @gui, @debug = false) ->
             assert @program.length != 0, "programs should have at least one function."
+
+            if @gui
+                @gui.setLevel(@level)
+            else
+                @gui =
+                    pick: ->
+                    drop: ->
+                    moveLeft: ->
+                    moveRight: ->
 
             @history    = []
             @ip         = 0 # instruction pointer
@@ -87,24 +98,28 @@ EngineModule = do ->
             if @botBlock and @level.tryPush @botPos, @botBlock
                 @ip++
                 @botBlock = null
+                @gui.drop()
                 return true
             else if not @botBlock
                 popped = @level.tryPop @botPos
                 if popped
                     @botBlock = popped
                     @ip++
+                    @gui.pick()
                     return true
 
         _cmdMoveLeft: ->
             if @botPos > 0
                 @botPos--
                 @ip++
+                @gui.moveLeft()
                 return true
 
         _cmdMoveRight: ->
             if @botPos < @_width - 1
                 @botPos++
                 @ip++
+                @gui.moveRight()
                 return true
 
         _cmdCall: (funName) ->
@@ -117,9 +132,9 @@ EngineModule = do ->
                 throw new Error "function is not defined: #{instr.function}"
 
         step: ->
-            console.log "step"
+            if @debug
+                console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
 
-            console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
             if @ip > @currentFun.commands.length - 1
                 throw "halt"
                 return
@@ -144,6 +159,10 @@ EngineModule = do ->
 
             else
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
+
+            if @debug
+                console.log @level
+                console.log "botPos: #{@botPos}, botBlock: #{@botBlock}"
 
         stepBack: ->
             # TODO
