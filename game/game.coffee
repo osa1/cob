@@ -20,6 +20,9 @@ Game = do ->
       luv.graphics.setColor 255, 255, 255
       fillRect @posx, @posy
 
+      if @attachedTo
+        @attachedTo.draw()
+
     update: (dt) ->
       if @targetx == @posx and @targety == @posy
         return
@@ -49,6 +52,9 @@ Game = do ->
         @onComplete()
         @onComplete = ->
 
+      if @attachedTo
+        @attachedTo.update dt
+          
     bottomPos: ->
       [ @posx, @posy + BLOCK_HEIGHT / 2 ]
 
@@ -62,7 +68,7 @@ Game = do ->
           console.log "ERROR: invalid dir: #{cmd.dir}"
       else if cmd.cmd == "down"
         console.log "down"
-        col = (@posx + BLOCK_WIDTH / 2) / BLOCK_WIDTH
+        col = colOf @posx
         console.log "bot col: #{col}"
         [ topBlockPos, topBlock ] = @level.topBlock col
         if @attachedTo == null
@@ -71,6 +77,7 @@ Game = do ->
             topBlock.attach this
             @targety = BLOCK_HEIGHT / 2
             @attachedTo = topBlock
+            @level.pop col
 
           @targety = topBlockPos - BLOCK_HEIGHT / 2
         else
@@ -109,7 +116,8 @@ Game = do ->
   class Level
     constructor: (@lvlData) ->
       console.log "loading level: #{@lvlData}"
-      @bot    = new Bot SCREEN_WIDTH / 2, BLOCK_HEIGHT / 2, this
+      console.log "bot col #{colOf (SCREEN_WIDTH / 2)}"
+      @bot    = new Bot colOf(SCREEN_WIDTH / 2) * BLOCK_WIDTH + BLOCK_WIDTH / 2, BLOCK_HEIGHT / 2, this
       @blocks = []
 
       for colIdx in [0..@lvlData.length-1]
@@ -151,6 +159,9 @@ Game = do ->
     topBlock: (col) ->
       console.log "level col: #{col}"
       [ SCREEN_HEIGHT - (@blocks[col].length - 1) * BLOCK_HEIGHT, @blocks[col][@blocks[col].length-1] ]
+
+    pop: (col) ->
+      @blocks[col].pop()
 
   currentLevel = null
 
