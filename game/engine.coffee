@@ -72,7 +72,7 @@ EngineModule = do ->
             assert @program.length != 0, "programs should have at least one function."
 
             if @gui
-                @gui.setLevel(@level)
+                @gui.setLevel(@level.stage)
             else
                 @gui =
                     pick: ->
@@ -90,36 +90,40 @@ EngineModule = do ->
 
         _lookupFun: (funName) ->
             for f in @program
-                if f.function == funName
+                if f.id == funName
                     return f
             return null
 
-        _cmdDown: ->
+        _cmdDown: (updateGui) ->
             if @botBlock and @level.tryPush @botPos, @botBlock
                 @ip++
                 @botBlock = null
-                @gui.drop()
+                if updateGui
+                    @gui.drop()
                 return true
             else if not @botBlock
                 popped = @level.tryPop @botPos
                 if popped
                     @botBlock = popped
                     @ip++
-                    @gui.pick()
+                    if updateGui
+                        @gui.pick()
                     return true
 
-        _cmdMoveLeft: ->
+        _cmdMoveLeft: (updateGui) ->
             if @botPos > 0
                 @botPos--
                 @ip++
-                @gui.moveLeft()
+                if updateGui
+                    @gui.moveLeft()
                 return true
 
-        _cmdMoveRight: ->
+        _cmdMoveRight: (updateGui) ->
             if @botPos < @level._width - 1
                 @botPos++
                 @ip++
-                @gui.moveRight()
+                if updateGui
+                    @gui.moveRight()
                 return true
 
         _cmdCall: (funName) ->
@@ -129,9 +133,9 @@ EngineModule = do ->
                 @ip = 0
                 return true
             else
-                throw new Error "function is not defined: #{instr.function}"
+                throw new Error "function is not defined: #{funName}"
 
-        step: ->
+        step: (updateGui = true) ->
             if @debug
                 console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
 
@@ -140,22 +144,23 @@ EngineModule = do ->
                 return
 
             instr = @currentFun.commands[@ip]
+            console.log instr
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
-                    if @_cmdMoveLeft()
+                    if @_cmdMoveLeft updateGui
                         @history.push instr
                 else if dir == "right"
-                    if @_cmdMoveRight()
+                    if @_cmdMoveRight updateGui
                         @history.push instr
 
             else if instr.cmd == "down"
-                if @_cmdDown()
+                if @_cmdDown updateGui
                     @history.push instr
 
             else if instr.cmd == "call"
                 if @_cmdCall instr.function
-                    @history.push cmd: "call", function: istr.function, from: @currentFunction.id
+                    @history.push cmd: "call", function: instr.function, from: @currentFunction.id
 
             else
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
@@ -171,9 +176,11 @@ EngineModule = do ->
         fastForward: ->
             try
                 while true
-                    @step()
+                    @step false
             catch error
-                if error != "halt"
+                if error == "halt" and @gui
+                    @gui.setLevel @level.stage
+                else if error != "halt"
                     throw error
 
 
