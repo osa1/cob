@@ -49,7 +49,7 @@
     // this is stupid.
     var id = function (s) { return document.getElementById(s); }
     CodeMirror.defineMode("botlang", BotlangMode);
-    var cm = CodeMirror(id("editor"), { theme: "ambiance", lineNumbers: true, mode: "botlang" });
+    var cm = CodeMirror(id("editor"), { theme: "ambiance", lineNumbers: true, indentWithTabs: true, mode: "botlang" });
 
 
     var runBtn = id("run-link");
