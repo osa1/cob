@@ -101,8 +101,8 @@ GuiModule = do ->
 
         setLevel: (mapData) ->
             @map = []
-            for colIdx in [0..mapData.stage.length-1]
-                col = mapData.stage[colIdx]
+            for colIdx in [0..mapData.length-1]
+                col = mapData[colIdx]
                 newCol = []
                 for rowIdx in [0..col.length-1]
                     row = col[rowIdx]
@@ -129,6 +129,9 @@ GuiModule = do ->
 
             console.log @bot
             console.log @map
+
+        isBusy: ->
+            @bot.busy
 
         draw: ->
             for col in @map

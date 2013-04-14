@@ -16,14 +16,22 @@
     </div>
     <div id="editor"> </div>
     <div id="editor-controllers">
+      <a id="load-link">Load</a>
       <a id="run-link">Run</a>
+      <a id="step-link">Step</a>
     </div>
   </body>
 
   <!--load game library and the game -->
   <script src="luv.js"></script>
+
+  <script src="game-js/utils.js"></script>
   <script src="game-js/config.js"></script>
   <script src="game-js/world.js"></script>
+
+  <script src="game-js/engine.js"></script>
+  <script src="game-js/gui.js"></script>
+
   <script src="game-js/game.js"></script>
 
   <!-- load the editor -->
@@ -41,13 +49,28 @@
     var cm = CodeMirror(id("editor"));
 
     var runBtn = id("run-link");
-    runBtn.onclick = function () {
+    var stepBtn = id("step-link");
+    var loadBtn = id("load-link");
+
+    var lvl = new Level(
+      fixColHeights([["r", "g"],[],[],[]]),
+      fixColHeights([[],[],[],["r", "g"]]));
+    var program = parser.parse("program1: move left move left down down");
+
+    var gui = new Gui()
+    var engine = new GameEngine(lvl, program, gui, true)
+
+    loadBtn.onclick = function () {
       var val = parser.parse(cm.doc.getValue());
       console.log(val);
-      Game.runProgram(val);
+      engine = new GameEngine(lvl, val, gui, true)
     };
 
-    Game.loadLevel([ "rgb", "rrr", "ggg", "rgb", "bgr", "rgb", "bbb", "rrr", "ggg" ]);
+    stepBtn.onclick = function () {
+      engine.step()
+    };
+
+    //Game.loadLevel([ "ggg", "rrr", "ggg", "rgb", "bgr", "rgb", "bbb", "rrr", "ggg", "rrr" ]);
   </script>
 
 
