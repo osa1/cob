@@ -71,6 +71,14 @@ GuiModule = do ->
             if @targetx == @posx and @targety == @posy
                 @onComplete()
 
+        forceUpdate: ->
+            while @posx != @targetx or @posy != @targety
+                @posx = @targetx
+                @posy = @targety
+                if @attachedTo
+                    @attachedTo.update 0
+                @onComplete()
+
 
     class Block
 
@@ -147,9 +155,14 @@ GuiModule = do ->
 
             @bot.update dt
 
+        forceUpdate: ->
+            @bot.forceUpdate()
+
         # FIXME
         pick: =>
             console.log "gui.pick"
+            @forceUpdate()
+
             col = colOf @bot.posx
             @bot.moveTo @bot.posx, SCREEN_HEIGHT - (@map[col].length * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
             @bot.busy = true
@@ -164,6 +177,8 @@ GuiModule = do ->
 
         drop: ->
             console.log "gui.drop"
+            @forceUpdate()
+
             col = colOf @bot.posx
             @bot.moveTo @bot.posx, SCREEN_HEIGHT - ((@map[col].length + 1) * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
             @bot.busy = true
@@ -178,6 +193,8 @@ GuiModule = do ->
 
         moveLeft: ->
             console.log "gui.moveLeft"
+            @forceUpdate()
+
             @bot.moveGridDelta -1, 0
             @bot.onComplete = =>
                 console.log "moveLeft completed"
@@ -186,6 +203,8 @@ GuiModule = do ->
 
         moveRight: ->
             console.log "gui.moveRight"
+            @forceUpdate()
+
             @bot.moveGridDelta 1, 0
             @bot.onComplete = =>
                 console.log "moveRight completed"
