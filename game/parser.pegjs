@@ -1,6 +1,14 @@
 start = functions
 
-ws = [\t\n\r ]
+LineTerminator
+  = [\n\r\u2028\u2029]
+
+SingleLineComment
+  = "#" (!LineTerminator .)*
+
+ws
+  = [\t\n\r ]
+  / SingleLineComment
 
 id
   = id:[A-Za-z0-9]+
