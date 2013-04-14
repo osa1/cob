@@ -7,7 +7,8 @@ id
       { return id.join(""); }
 
 functions
-  = function+
+  = p:function+ ws*
+      { return p; }
 
 function
   = ws* id:id ws* ":" ws* commands:command+
