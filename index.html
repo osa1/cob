@@ -36,6 +36,7 @@
 
   <!-- load the editor -->
   <script src="codemirror-compressed.js"></script>
+  <script src="botlang/mode.js"></script>
   <link rel="stylesheet" href="codemirror-3.11/lib/codemirror.css">
   <link rel="stylesheet" href="codemirror-3.11/theme/ambiance.css">
 
@@ -47,15 +48,18 @@
     // var id = document.getElementById doesn't work for some reason, but this works fine.
     // this is stupid.
     var id = function (s) { return document.getElementById(s); }
-    var cm = CodeMirror(id("editor"), { theme: "ambiance", lineNumbers: true });
+    CodeMirror.defineMode("botlang", BotlangMode);
+    var cm = CodeMirror(id("editor"), { theme: "ambiance", lineNumbers: true, mode: "botlang" });
+
 
     var runBtn = id("run-link");
     var stepBtn = id("step-link");
     var loadBtn = id("load-link");
 
     var lvl = new Level(
-      fixColHeights([["r", "g"],[],[],[]]),
-      fixColHeights([[],[],[],["r", "g"]]));
+      fixColHeights([["b", "r", "g", "y"], [], []]),
+      fixColHeights([[], [], ["b", "r", "g", "y"]]));
+
     var program = parser.parse("program1: move left move left down down");
 
     var gui = new Gui()
