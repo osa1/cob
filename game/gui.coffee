@@ -18,6 +18,19 @@ GuiModule = do ->
             @targetx = @posx + x * BLOCK_WIDTH
             @targety = @posy + y * BLOCK_HEIGHT
 
+        moveTo: (x, y) ->
+            @targetx = x
+            @targety = y
+
+        attach: (obj) ->
+            @attachedTo = obj
+            obj.attach this
+
+        remove: ->
+            @attachedTo.remove()
+            @attachedTo = null
+
+
         draw: ->
             luv.graphics.setColor 255, 255, 255
             fillRect @posx, @posy
@@ -66,7 +79,7 @@ GuiModule = do ->
 
         draw: ->
             luv.graphics.setColor @color...
-            fillRect @posx, @posy - BLOCK_HEIGHT # FIXME: last part should be removed
+            fillRect @posx, @posy
 
         update: (dt) ->
             if @attached
@@ -77,7 +90,7 @@ GuiModule = do ->
         attach: (obj) ->
             @attached = obj
 
-        detach: () =>
+        remove: () =>
             @attached = null
 
 
@@ -87,11 +100,6 @@ GuiModule = do ->
             @map = []
 
         setLevel: (mapData) ->
-            @mapHeight = mapData.getHeight()
-            @mapHeight_blocks = @mapHeight / BLOCK_HEIGHT
-            @mapWidth_blocks = @mapWidth / BLOCK_WIDTH
-
-            @mapWidth  = mapData.getWidth()
             @map = []
             for colIdx in [0..mapData.stage.length-1]
                 col = mapData.stage[colIdx]
@@ -110,14 +118,14 @@ GuiModule = do ->
                                 [ 0, 0, 255 ]
 
                         posx = colIdx * BLOCK_WIDTH + BLOCK_WIDTH / 2
-                        posy = SCREEN_HEIGHT - (rowIdx * BLOCK_HEIGHT - BLOCK_HEIGHT / 2)
+                        posy = SCREEN_HEIGHT - (rowIdx * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
 
                         block = new Block posx, posy, color
                         newCol.push block
 
                 @map.push newCol
 
-            @bot = new Bot ((@map.length / 2) * BLOCK_WIDTH + BLOCK_WIDTH / 2), BLOCK_HEIGHT / 2
+            @bot = new Bot ((Math.floor @map.length / 2) * BLOCK_WIDTH + BLOCK_WIDTH / 2), BLOCK_HEIGHT / 2
 
             console.log @bot
             console.log @map
@@ -137,22 +145,49 @@ GuiModule = do ->
             @bot.update dt
 
         # FIXME
-        pick: ->
-            #col = colOf @bot.posx
-            #@bot.moveGridDelta 0, @mapHeight_blocks - col.length
-            #@bot.onComplete = ->
-                #@bot.attach @map[col].pop()
-                #@bot.attachedTo.attach @bot
+        pick: =>
+            console.log "gui.pick"
+            col = colOf @bot.posx
+            @bot.moveTo @bot.posx, SCREEN_HEIGHT - (@map[col].length * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
+            @bot.busy = true
+            @bot.onComplete = =>
+                @bot.attach @map[col].pop()
+                @bot.moveTo @bot.posx, BLOCK_HEIGHT / 2
+                console.log @bot
+                @bot.onComplete = =>
+                    console.log "pick completed"
+                    @bot.busy = false
+                    @bot.onComplete = ->
 
         drop: ->
+            console.log "gui.drop"
+            col = colOf @bot.posx
+            @bot.moveTo @bot.posx, SCREEN_HEIGHT - ((@map[col].length + 1) * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
+            @bot.busy = true
+            @bot.onComplete = =>
+                @map[col].push @bot.attachedTo
+                @bot.remove()
+                @bot.moveTo @bot.posx, BLOCK_HEIGHT / 2
+                @bot.onComplete = =>
+                    console.log "drop completed"
+                    @bot.busy = false
+                    @bot.onComplete = ->
 
         moveLeft: ->
             console.log "gui.moveLeft"
             @bot.moveGridDelta -1, 0
+            @bot.onComplete = =>
+                console.log "moveLeft completed"
+                @bot.busy = false
+                @bot.onComplete = ->
 
         moveRight: ->
             console.log "gui.moveRight"
             @bot.moveGridDelta 1, 0
+            @bot.onComplete = =>
+                console.log "moveRight completed"
+                @bot.busy = false
+                @bot.onComplete = ->
 
     Gui: Gui
 

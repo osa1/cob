@@ -116,7 +116,7 @@ EngineModule = do ->
                 return true
 
         _cmdMoveRight: ->
-            if @botPos < @_width - 1
+            if @botPos < @level._width - 1
                 @botPos++
                 @ip++
                 @gui.moveRight()
