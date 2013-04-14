@@ -30,7 +30,6 @@ GuiModule = do ->
             @attachedTo.remove()
             @attachedTo = null
 
-
         draw: ->
             luv.graphics.setColor 255, 255, 255
             fillRect @posx, @posy
@@ -76,7 +75,7 @@ GuiModule = do ->
                 @posx = @targetx
                 @posy = @targety
                 if @attachedTo
-                    @attachedTo.update 0
+                    @attachedTo.setPosRelative()
                 @onComplete()
 
 
@@ -89,11 +88,14 @@ GuiModule = do ->
             luv.graphics.setColor @color...
             fillRect @posx, @posy
 
-        update: (dt) ->
+        setPosRelative: ->
             if @attached
                 [bottomx, bottomy] = @attached.bottomPos()
                 @posx = bottomx
                 @posy = bottomy + BLOCK_WIDTH / 2
+
+        update: (dt) ->
+            @setPosRelative()
 
         attach: (obj) ->
             @attached = obj
@@ -122,8 +124,10 @@ GuiModule = do ->
                                 [ 255, 0, 0 ]
                             else if row == "g"
                                 [ 0, 255, 0 ]
-                            else
+                            else if row == "b"
                                 [ 0, 0, 255 ]
+                            else
+                                [ 255, 234, 173 ]
 
                         posx = colIdx * BLOCK_WIDTH + BLOCK_WIDTH / 2
                         posy = SCREEN_HEIGHT - (rowIdx * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
