@@ -160,7 +160,7 @@ EngineModule = do ->
 
             else if instr.cmd == "call"
                 if @_cmdCall instr.function
-                    @history.push cmd: "call", function: instr.function, from: @currentFunction.id
+                    @history.push cmd: "call", function: instr.function, from: @currentFun.id
 
             else
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
