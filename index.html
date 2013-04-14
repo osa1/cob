@@ -37,6 +37,7 @@
   <!-- load the editor -->
   <script src="codemirror-compressed.js"></script>
   <link rel="stylesheet" href="codemirror-3.11/lib/codemirror.css">
+  <link rel="stylesheet" href="codemirror-3.11/theme/ambiance.css">
 
   <!-- load parser -->
   <script src="game-js/parser.js"></script>
@@ -46,7 +47,7 @@
     // var id = document.getElementById doesn't work for some reason, but this works fine.
     // this is stupid.
     var id = function (s) { return document.getElementById(s); }
-    var cm = CodeMirror(id("editor"));
+    var cm = CodeMirror(id("editor"), { theme: "ambiance", lineNumbers: true });
 
     var runBtn = id("run-link");
     var stepBtn = id("step-link");
