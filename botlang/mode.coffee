@@ -6,18 +6,22 @@ window.BotlangMode = do -> ->
     token: (stream, state) ->
         # TODO: atom and fun should be the other way around,
         # but this looks more `normal`, maybe because color scheme
+        if stream.peek() == "#"
+            stream.skipToEnd()
+            console.log "comment"
+            state.indent = stream.indentation()
+            return "comment"
+
         if stream.sol()
             if stream.skipTo(':')
-                stream.next()
                 console.log "return cm-fun"
-                state.indent = stream.indentation() + 1
+                state.indent = stream.indentation() + 4
                 return "atom"
             else
-                if stream.indentation() == 0
-                    state.indent = 0
+                state.indent = stream.indentation()
 
-        stream.skipToEnd()
+        stream.next()
         return "fun"
 
     indent: (state, textAfter) ->
-        return state.indent * 4
+        return state.indent
