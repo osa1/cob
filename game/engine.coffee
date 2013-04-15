@@ -30,9 +30,12 @@ EngineModule = do ->
 
     class Level
 
-        constructor: (@stage, @goal, @maxHeight = 5) ->
+        constructor: (@stage, @goal, @maxHeight = 0) ->
             if @stage.length != @goal.length
                 throw { err: "Level can't created", reason: "stage and goal lengths are not equal" }
+
+            for col in @stage
+                @maxHeight = Math.max @maxHeight, col.length
 
         getWidth: ->
             return @stage.length
@@ -55,6 +58,20 @@ EngineModule = do ->
 
             colData.push val
             return true
+
+        exportStage: ->
+            # TODO: This part needs more testing
+            lvlstr_arr = []
+            for col in @stage
+                colstr_arr = []
+                for i in [0..@maxHeight]
+                    if col[i]
+                        colstr_arr.push col[i]
+                    else
+                        colstr_arr.push "-"
+                lvlstr_arr.push colstr_arr.join ""
+            return lvlstr_arr.join ""
+
 
 
     class GameEngine
