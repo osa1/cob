@@ -1,69 +1,60 @@
 EngineModule = do ->
 
-    # make column heights in a map equal by adding `null` spaces.
-    fixColHeights = (lvlData) ->
-        maxHeight = 0
-        for col in lvlData
-            maxHeight = Math.max col.length, maxHeight
+    levelFromString = (string) ->
+        # FIXME: Each col height should be 5, this is hard-coded,
+        # remove this if necessary.
+        parts = string.split("|")
+        if parts.length != 2 or
+              parts[0].length % 5 != 0 or
+              parts[1].length % 5 != 0
+            throw { reason: "malformed string" }
 
-        ret = []
-        for col in lvlData
-            newCol = []
-            for r in col
-                newCol.push r
+        stageStr = parts[0]
+        goalStr  = parts[1]
 
-            if maxHeight != col.length
-                for i in [0..maxHeight - col.length - 1]
-                    newCol.push null
-            ret.push newCol
-        return ret
+        getLevelData = (string) ->
+            level = []
+            for i in [0..string.length/5-1]
+                col = string.slice i * 5, (i + 1) * 5
+                levelCol = []
+                for cidx in [0..col.length-1]
+                    char = col[cidx]
+                    if char != '-'
+                        levelCol.push char
+                level.push levelCol
+
+            return level
+
+        return new Level getLevelData(stageStr), getLevelData(goalStr)
 
 
     class Level
 
-        constructor: (@stage, @goal) ->
-            @_width  = @stage.length
-            @_height = @stage[0].length
-
-            for col in @stage
-                if col.length != @_height
-                    throw new Error "Level data is not well-formed. (different col heights)"
-
-        getHeight: ->
-            return @_height
+        constructor: (@stage, @goal, @maxHeight = 5) ->
+            if @stage.length != @goal.length
+                throw { err: "Level can't created", reason: "stage and goal lengths are not equal" }
 
         getWidth: ->
-            return @_width
+            return @stage.length
 
         tryPop: (col) ->
-            assert 0 <= col < @_width, "pop: col is out of bounds: #{col}"
+            assert 0 <= col < @getWidth(), "pop: col is out of bounds: #{col}"
 
             colData = @stage[col]
-            for i in [@_height-1..0] by -1
-                if colData[i] != null
-                    r = colData[i]
-                    colData[i] = null
-                    return r
-            return null
+            if colData.length == 0
+                return null
+            return colData.pop()
 
         tryPush: (col, val) ->
-            assert 0 <= col < @_width, "tryPush: col is out of bounds: #{col}"
+            assert 0 <= col < @getWidth(), "tryPush: col is out of bounds: #{col}"
 
             colData = @stage[col]
-            if colData[@_height-1]
+            if colData.length == @maxHeight
                 # col is full
                 return false
 
-            for i in [@_height-2..0] by -1
-                if colData[i] != null
-                    colData[i+1] = val
-                    return true
-                else if i == 0
-                    # col is empty
-                    colData[0] = val
-                    return true
-
-            return false
+            colData.push val
+            return true
 
 
     class GameEngine
@@ -119,7 +110,7 @@ EngineModule = do ->
                 return true
 
         _cmdMoveRight: (updateGui) ->
-            if @botPos < @level._width - 1
+            if @botPos < @level.getWidth() - 1
                 @botPos++
                 @ip++
                 if updateGui
@@ -144,7 +135,6 @@ EngineModule = do ->
                 return
 
             instr = @currentFun.commands[@ip]
-            console.log instr
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
@@ -186,8 +176,8 @@ EngineModule = do ->
 
     Level: Level,
     GameEngine: GameEngine,
-    fixColHeights: fixColHeights
+    levelFromString: levelFromString
 
 window.Level         = EngineModule.Level
 window.GameEngine    = EngineModule.GameEngine
-window.fixColHeights = EngineModule.fixColHeights
+window.levelFromString = EngineModule.levelFromString
