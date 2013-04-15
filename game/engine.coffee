@@ -1,8 +1,6 @@
 EngineModule = do ->
 
     levelFromString = (string) ->
-        # FIXME: Each col height should be 5, this is hard-coded,
-        # remove this if necessary.
         parts = string.split("|")
         if parts.length != 2 or
               parts[0].length % 5 != 0 or
@@ -113,7 +111,6 @@ EngineModule = do ->
                 popped = @level.tryPop @botPos
                 if popped
                     @botBlock = popped
-                    @ip++
                     if updateGui
                         @gui.pick()
                     return true
@@ -121,7 +118,6 @@ EngineModule = do ->
         _cmdMoveLeft: (updateGui) ->
             if @botPos > 0
                 @botPos--
-                @ip++
                 if updateGui
                     @gui.moveLeft()
                 return true
@@ -129,7 +125,6 @@ EngineModule = do ->
         _cmdMoveRight: (updateGui) ->
             if @botPos < @level.getWidth() - 1
                 @botPos++
-                @ip++
                 if updateGui
                     @gui.moveRight()
                 return true
@@ -138,7 +133,6 @@ EngineModule = do ->
             fun = @_lookupFun funName
             if fun
                 @currentFun = fun
-                @ip = 0
                 return true
             else
                 throw new Error "function is not defined: #{funName}"
@@ -157,17 +151,21 @@ EngineModule = do ->
                 if dir == "left"
                     if @_cmdMoveLeft updateGui
                         @history.push instr
+                        @ip++
                 else if dir == "right"
                     if @_cmdMoveRight updateGui
                         @history.push instr
+                        @ip++
 
             else if instr.cmd == "down"
                 if @_cmdDown updateGui
                     @history.push instr
+                    @ip++
 
             else if instr.cmd == "call"
                 if @_cmdCall instr.function
-                    @history.push cmd: "call", function: instr.function, from: @currentFun.id
+                    @history.push cmd: "call", function: instr.function, from: @currentFun.id, ip: @ip
+                    @ip = 0
 
             else
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
@@ -176,9 +174,27 @@ EngineModule = do ->
                 console.log @level
                 console.log "botPos: #{@botPos}, botBlock: #{@botBlock}"
 
-        stepBack: ->
-            # TODO
-            throw new Error "stepBack not yet implemented"
+        stepBack: (updateGui = true) ->
+            instr = @history.pop()
+            if not instr
+                return
+
+            if instr.cmd == "move"
+                dir = instr.dir
+                if dir == "left"
+                    @_cmdMoveRight updateGui
+                    @ip--
+                else if dir == "right"
+                    @_cmdMoveLeft updateGui
+                    @ip--
+
+            else if instr.cmd == "down"
+                @_cmdDown updateGui
+                @ip--
+
+            else if instr.cmd == "call"
+                @currentFun = @_lookupFun instr.from
+                @ip = instr.id
 
         fastForward: ->
             try
