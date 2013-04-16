@@ -12,11 +12,11 @@ GuiModule = do ->
             @onComplete = ->
 
         bottomPos: ->
-            [ @posx, @posy + BLOCK_HEIGHT / 2 ]
+            [ @posx, @posy + 0.5 ]
 
-        moveGridDelta: (x, y) ->
-            @targetx = @posx + x * BLOCK_WIDTH
-            @targety = @posy + y * BLOCK_HEIGHT
+        moveDelta: (x, y) ->
+            @targetx = @posx + x
+            @targety = @posy + y
 
         moveTo: (x, y) ->
             @targetx = x
@@ -92,7 +92,7 @@ GuiModule = do ->
             if @attached
                 [bottomx, bottomy] = @attached.bottomPos()
                 @posx = bottomx
-                @posy = bottomy + BLOCK_WIDTH / 2
+                @posy = bottomy + 0.5
 
         update: (dt) ->
             @setPosRelative()
@@ -129,15 +129,15 @@ GuiModule = do ->
                             else
                                 [ 255, 234, 173 ]
 
-                        posx = colIdx * BLOCK_WIDTH + BLOCK_WIDTH / 2
-                        posy = SCREEN_HEIGHT - (rowIdx * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
+                        posx = colIdx
+                        posy = MAX_BLOCKS_HEIGHT - rowIdx - 1
 
                         block = new Block posx, posy, color
                         newCol.push block
 
                 @map.push newCol
 
-            @bot = new Bot ((Math.floor @map.length / 2) * BLOCK_WIDTH + BLOCK_WIDTH / 2), BLOCK_HEIGHT / 2
+            @bot = new Bot (Math.floor @map.length / 2), 0
 
             console.log @bot
             console.log @map
@@ -168,11 +168,11 @@ GuiModule = do ->
             @forceUpdate()
 
             col = colOf @bot.posx
-            @bot.moveTo @bot.posx, SCREEN_HEIGHT - (@map[col].length * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
+            @bot.moveTo @bot.posx, MAX_BLOCKS_HEIGHT - @map[col].length - 1
             @bot.busy = true
             @bot.onComplete = =>
                 @bot.attach @map[col].pop()
-                @bot.moveTo @bot.posx, BLOCK_HEIGHT / 2
+                @bot.moveTo @bot.posx, 0
                 console.log @bot
                 @bot.onComplete = =>
                     console.log "pick completed"
@@ -184,12 +184,12 @@ GuiModule = do ->
             @forceUpdate()
 
             col = colOf @bot.posx
-            @bot.moveTo @bot.posx, SCREEN_HEIGHT - ((@map[col].length + 1) * BLOCK_HEIGHT + BLOCK_HEIGHT / 2)
+            @bot.moveDelta 0, MAX_BLOCKS_HEIGHT - @map[col].length - 2
             @bot.busy = true
             @bot.onComplete = =>
                 @map[col].push @bot.attachedTo
                 @bot.remove()
-                @bot.moveTo @bot.posx, BLOCK_HEIGHT / 2
+                @bot.moveTo @bot.posx, 0
                 @bot.onComplete = =>
                     console.log "drop completed"
                     @bot.busy = false
@@ -199,7 +199,7 @@ GuiModule = do ->
             console.log "gui.moveLeft"
             @forceUpdate()
 
-            @bot.moveGridDelta -1, 0
+            @bot.moveDelta -1, 0
             @bot.onComplete = =>
                 console.log "moveLeft completed"
                 @bot.busy = false
@@ -209,7 +209,7 @@ GuiModule = do ->
             console.log "gui.moveRight"
             @forceUpdate()
 
-            @bot.moveGridDelta 1, 0
+            @bot.moveDelta 1, 0
             @bot.onComplete = =>
                 console.log "moveRight completed"
                 @bot.busy = false
