@@ -114,26 +114,27 @@ GuiModule = do ->
             for colIdx in [0..mapData.length-1]
                 col = mapData[colIdx]
                 newCol = []
-                for rowIdx in [0..col.length-1]
-                    row = col[rowIdx]
-                    if row == null
-                        break
-                    else
-                        color =
-                            if row == "r"
-                                [ 255, 0, 0 ]
-                            else if row == "g"
-                                [ 0, 255, 0 ]
-                            else if row == "b"
-                                [ 0, 0, 255 ]
-                            else
-                                [ 255, 234, 173 ]
+                if col.length != 0
+                    for rowIdx in [0..col.length-1]
+                        row = col[rowIdx]
+                        if row == null
+                            break
+                        else
+                            color =
+                                if row == "r"
+                                    [ 255, 0, 0 ]
+                                else if row == "g"
+                                    [ 0, 255, 0 ]
+                                else if row == "b"
+                                    [ 0, 0, 255 ]
+                                else
+                                    [ 255, 234, 173 ]
 
-                        posx = colIdx
-                        posy = MAX_BLOCKS_HEIGHT - rowIdx - 1
+                            posx = colIdx
+                            posy = MAX_BLOCKS_HEIGHT - rowIdx - 1
 
-                        block = new Block posx, posy, color
-                        newCol.push block
+                            block = new Block posx, posy, color
+                            newCol.push block
 
                 @map.push newCol
 
