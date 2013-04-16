@@ -23,7 +23,7 @@ EngineModule = do ->
 
             return level
 
-        return new Level getLevelData(stageStr), getLevelData(goalStr)
+        return new Level getLevelData(stageStr), getLevelData(goalStr), 7 # FIXME: hard-coded
 
 
     class Level
@@ -105,8 +105,8 @@ EngineModule = do ->
             return null
 
         _cmdDown: (updateGui) ->
+            console.log @botPos, @botBlock
             if @botBlock and @level.tryPush @botPos, @botBlock
-                @ip++
                 @botBlock = null
                 if updateGui
                     @gui.drop()
@@ -148,6 +148,7 @@ EngineModule = do ->
         step: (updateGui = true) ->
             if @debug
                 console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
+                console.log @currentFun
 
             if @ip > @currentFun.commands.length - 1
                 jmp = @callStack.pop()
@@ -157,10 +158,13 @@ EngineModule = do ->
                     @history.push cmd: "call", function: jmp.from, from: @currentFun.id, ip: @ip
                     @currentFun = @_lookupFun jmp.from
                     @ip = jmp.ip
+                    return
                 else
                     throw "halt"
 
             instr = @currentFun.commands[@ip]
+            console.log "intsr to run:"
+            console.log instr
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
@@ -200,7 +204,7 @@ EngineModule = do ->
 
             else if instr.cmd == "call"
                 @currentFun = @_lookupFun instr.from
-                @ip = instr.id
+                @ip = instr.ip
 
         fastForward: ->
             try

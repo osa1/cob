@@ -106,8 +106,12 @@ GuiModule = do ->
 
     class Gui
 
-        constructor: (@gui, @maxBlockHeight, @botSpeed) ->
+        constructor: (@internal, @maxBlockHeight, @botSpeed, @drawBot = true) ->
             @map = []
+
+            @internal.update = (dt) => @update dt
+            @internal.draw   =      => @draw()
+            @internal.run()
 
         setLevel: (mapData) ->
             @map = []
@@ -133,12 +137,13 @@ GuiModule = do ->
                             posx = colIdx
                             posy = @maxBlockHeight - rowIdx - 1
 
-                            block = new Block @gui, posx, posy, color
+                            block = new Block @internal, posx, posy, color
                             newCol.push block
 
                 @map.push newCol
 
-            @bot = new Bot @gui, (Math.floor @map.length / 2), 0, @botSpeed
+            if @drawBot
+                @bot = new Bot @internal, (Math.floor @map.length / 2), 0, @botSpeed
 
             console.log @bot
             console.log @map
@@ -151,14 +156,16 @@ GuiModule = do ->
                 for row in col
                     row.draw()
 
-            @bot.draw()
+            if @drawBot
+                @bot.draw()
 
         update: (dt) ->
             for col in @map
                 for row in col
                     row.update dt
 
-            @bot.update dt
+            if @drawBot
+                @bot.update dt
 
         forceUpdate: ->
             @bot.forceUpdate()
