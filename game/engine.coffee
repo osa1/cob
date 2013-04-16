@@ -74,11 +74,11 @@ EngineModule = do ->
 
     class GameEngine
 
-        constructor: (@level, @program, @gui, @debug = false) ->
+        constructor: (@level, @program, @gui, @targetGui, @debug = false) ->
             assert @program.length != 0, "programs should have at least one function."
 
             if @gui
-                @gui.setLevel(@level.stage)
+                @gui.setLevel @level.stage
             else
                 @gui =
                     pick: ->
@@ -86,9 +86,13 @@ EngineModule = do ->
                     moveLeft: ->
                     moveRight: ->
 
+            if @targetGui
+                @targetGui.setLevel @level.goal
+
             @history    = []
             @ip         = 0 # instruction pointer
             @currentFun = @program[0]
+            @callStack  = []
 
             # bot state
             @botPos     = Math.floor @level.getWidth() / 2
@@ -132,18 +136,29 @@ EngineModule = do ->
         _cmdCall: (funName) ->
             fun = @_lookupFun funName
             if fun
+                @ip++
+                @history.push cmd: "call", function: funName, from: @currentFun.id, ip: @ip
+                @callStack.push from: @currentFun.id, ip: @ip
+                @ip = 0
+
                 @currentFun = fun
-                return true
             else
-                throw new Error "function is not defined: #{funName}"
+                throw new Error "unimplemedted cmd: #{instr.cmd}"
 
         step: (updateGui = true) ->
             if @debug
                 console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
 
             if @ip > @currentFun.commands.length - 1
-                throw "halt"
-                return
+                jmp = @callStack.pop()
+                if jmp
+                    console.log "jumping"
+                    console.log jmp
+                    @history.push cmd: "call", function: jmp.from, from: @currentFun.id, ip: @ip
+                    @currentFun = @_lookupFun jmp.from
+                    @ip = jmp.ip
+                else
+                    throw "halt"
 
             instr = @currentFun.commands[@ip]
             if instr.cmd == "move"
@@ -163,16 +178,7 @@ EngineModule = do ->
                     @ip++
 
             else if instr.cmd == "call"
-                if @_cmdCall instr.function
-                    @history.push cmd: "call", function: instr.function, from: @currentFun.id, ip: @ip
-                    @ip = 0
-
-            else
-                throw new Error "unimplemedted cmd: #{instr.cmd}"
-
-            if @debug
-                console.log @level
-                console.log "botPos: #{@botPos}, botBlock: #{@botBlock}"
+                @_cmdCall instr.function
 
         stepBack: (updateGui = true) ->
             instr = @history.pop()
