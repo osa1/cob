@@ -2,7 +2,7 @@ GuiModule = do ->
 
     class Bot
 
-        constructor: (@posx, @posy) ->
+        constructor: (@gui, @posx, @posy, @speed = 1.5) ->
             @targetx = @posx
             @targety = @posy
 
@@ -31,14 +31,14 @@ GuiModule = do ->
             @attachedTo = null
 
         draw: ->
-            luv.graphics.setColor 255, 255, 255
-            fillRect @posx, @posy
+            @gui.graphics.setColor 255, 255, 255
+            fillRect @gui, @posx, @posy
 
             if @attachedTo
                 @attachedTo.draw()
 
         update: (dt) ->
-            delta = dt * BOT_SPEED
+            delta = dt * @speed
 
             if @targetx < @posx
                 if @targetx > @posx - delta
@@ -81,12 +81,12 @@ GuiModule = do ->
 
     class Block
 
-        constructor: (@posx, @posy, @color) ->
+        constructor: (@gui, @posx, @posy, @color) ->
             @attached = null
 
         draw: ->
-            luv.graphics.setColor @color...
-            fillRect @posx, @posy
+            @gui.graphics.setColor @color...
+            fillRect @gui, @posx, @posy
 
         setPosRelative: ->
             if @attached
@@ -106,7 +106,7 @@ GuiModule = do ->
 
     class Gui
 
-        constructor: ->
+        constructor: (@gui, @maxBlockHeight, @botSpeed) ->
             @map = []
 
         setLevel: (mapData) ->
@@ -131,14 +131,14 @@ GuiModule = do ->
                                     [ 255, 234, 173 ]
 
                             posx = colIdx
-                            posy = MAX_BLOCKS_HEIGHT - rowIdx - 1
+                            posy = @maxBlockHeight - rowIdx - 1
 
-                            block = new Block posx, posy, color
+                            block = new Block @gui, posx, posy, color
                             newCol.push block
 
                 @map.push newCol
 
-            @bot = new Bot (Math.floor @map.length / 2), 0
+            @bot = new Bot @gui, (Math.floor @map.length / 2), 0, @botSpeed
 
             console.log @bot
             console.log @map
@@ -169,7 +169,7 @@ GuiModule = do ->
             @forceUpdate()
 
             col = colOf @bot.posx
-            @bot.moveTo @bot.posx, MAX_BLOCKS_HEIGHT - @map[col].length - 1
+            @bot.moveTo @bot.posx, @maxBlockHeight - @map[col].length - 1
             @bot.busy = true
             @bot.onComplete = =>
                 @bot.attach @map[col].pop()
@@ -185,7 +185,7 @@ GuiModule = do ->
             @forceUpdate()
 
             col = colOf @bot.posx
-            @bot.moveDelta 0, MAX_BLOCKS_HEIGHT - @map[col].length - 2
+            @bot.moveDelta 0, @maxBlockHeight - @map[col].length - 2
             @bot.busy = true
             @bot.onComplete = =>
                 @map[col].push @bot.attachedTo

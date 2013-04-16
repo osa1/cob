@@ -26,13 +26,10 @@
   <script src="luv.js"></script>
 
   <script src="game-js/utils.js"></script>
-  <script src="game-js/config.js"></script>
   <script src="game-js/world.js"></script>
 
   <script src="game-js/engine.js"></script>
   <script src="game-js/gui.js"></script>
-
-  <script src="game-js/game.js"></script>
 
   <!-- load the editor -->
   <script src="codemirror-compressed.js"></script>
@@ -56,13 +53,44 @@
     var stepBtn = id("step-link");
     var loadBtn = id("load-link");
 
-    var lvl = new Level(
-      fixColHeights([["b", "r", "g", "y"], [], []]),
-      fixColHeights([[], [], ["b", "r", "g", "y"]]));
+    var lvl;
+    try {
+      var query = window.location.search; 
+      if (query.length != 0) {
+        lvl = levelFromString(query.slice(1));
+      } else {
+        throw undefined;
+      }
+    } catch (e) {
+      console.log("error while creating from the query.");
+      lvl = new Level(
+        [["b", "b", "b"], [], ["r", "r", "r"]],
+        [[], [], ["b", "r", "b", "r", "b", "r"]]);
+    }
+
+    console.log(lvl);
 
     var program = parser.parse("program1: move left move left down down");
 
-    var gui = new Gui()
+    mainGui = Luv({
+      el: id("game-canvas"),
+      width: 600,
+      height: 400
+    });
+    mainGui.MAX_BLOCKS_WIDTH = 10;
+    mainGui.MAX_BLOCKS_HEIGHT = 8;
+    mainGui.BLOCK_WIDTH = mainGui.graphics.getWidth() / mainGui.MAX_BLOCKS_WIDTH;
+    mainGui.BLOCK_HEIGHT = mainGui.graphics.getHeight() / mainGui.MAX_BLOCKS_HEIGHT;
+
+
+    var gui = new Gui(mainGui, 8, 1.5)
+    mainGui.update = function (dt) {
+      gui.update(dt);
+    };
+    mainGui.draw = function () {
+      gui.draw();
+    };
+    mainGui.run();
     var engine = new GameEngine(lvl, program, gui, true)
 
     loadBtn.onclick = function () {
