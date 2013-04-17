@@ -15,11 +15,11 @@ id
       { return id.join(""); }
 
 functions
-  = p:function+ ws*
+  = p:function* ws*
       { return p; }
 
 function
-  = ws* id:id ws* ":" ws* commands:command+
+  = ws* id:id ws* ":" ws* commands:command*
       { return { id: id, commands: commands }; }
 
 command
