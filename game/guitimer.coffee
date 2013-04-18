@@ -1,4 +1,3 @@
-
 class window.GuiTimer
 
     constructor: (args...) ->
@@ -27,7 +26,7 @@ class window.GuiTimer
     draw: ->
         @gui.draw()
 
-    step: ->
+    _runNextCmd: ->
         if @queue.length != 0
             cmd = @queue[0]
             @queue = @queue.slice(1)
@@ -40,14 +39,17 @@ class window.GuiTimer
             return true
         return false
 
+    step: ->
+        @gui._forceUpdate()
+        @_runNextCmd()
+
     update: (dt) ->
         @gui.update(dt)
         if not @gui.isBusy()
-            @step()
+            @_runNextCmd()
 
     _forceUpdate: ->
-        while @step()
-            1
+        @gui._forceUpdate()
 
     pick: (fastForward) ->
         if fastForward

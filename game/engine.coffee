@@ -180,6 +180,8 @@ EngineModule = do ->
                     @ip = jmp.ip
                     return
                 else
+                    if updateGui
+                        @gui.step()
                     throw "halt"
 
             instr = @currentFun.commands[@ip]
