@@ -161,7 +161,9 @@ EngineModule = do ->
             else
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
 
-        step: (updateGui = true) ->
+        step: (args = {}) ->
+            updateGui   = args.updateGui || true
+            forceUpdate = args.forceUpdate || true
 
             if @ip > @currentFun.commands.length - 1
                 jmp = @callStack.pop()
@@ -178,15 +180,21 @@ EngineModule = do ->
                 dir = instr.dir
                 if dir == "left"
                     if @_cmdMoveLeft updateGui
+                        if forceUpdate
+                            @gui.forceUpdate()
                         @history.push instr
                         @ip++
                 else if dir == "right"
                     if @_cmdMoveRight updateGui
+                        if forceUpdate
+                            @gui.forceUpdate()
                         @history.push instr
                         @ip++
 
             else if instr.cmd == "down"
                 if @_cmdDown updateGui
+                        if forceUpdate
+                            @gui.forceUpdate()
                     @history.push instr
                     @ip++
 
@@ -202,23 +210,31 @@ EngineModule = do ->
                 dir = instr.dir
                 if dir == "left"
                     @_cmdMoveRight updateGui
+                    if updateGui
+                        @gui.forceUpdate()
                     @ip--
                 else if dir == "right"
                     @_cmdMoveLeft updateGui
+                    if updateGui
+                        @gui.forceUpdate()
                     @ip--
 
             else if instr.cmd == "down"
                 @_cmdDown updateGui
+                if updateGui
+                    @gui.forceUpdate()
                 @ip--
 
             else if instr.cmd == "call"
+                if updateGui
+                    @gui.forceUpdate()
                 @currentFun = @_lookupFun instr.from
                 @ip = instr.ip
 
         run: ->
             try
                 while true
-                    @step true
+                    @step updateGui: true, forceUpdate: false
             catch error
                 if error == "halt"
                     if arrEq @level.stage, @level.goal
@@ -231,7 +247,7 @@ EngineModule = do ->
         fastForward: ->
             try
                 while true
-                    @step false
+                    @step updateGui: false
             catch error
                 if error == "halt" and @gui
                     @gui.setLevel @level.stage
