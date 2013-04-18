@@ -27,9 +27,8 @@ class window.GuiTimer
     draw: ->
         @gui.draw()
 
-    update: (dt) ->
-        @gui.update(dt)
-        if not @gui.isBusy() and @queue.length != 0
+    step: ->
+        if @queue.length != 0
             cmd = @queue[0]
             @queue = @queue.slice(1)
 
@@ -38,26 +37,34 @@ class window.GuiTimer
                 when @cmds.drop       then @gui.drop()
                 when @cmds.moveLeft   then @gui.moveLeft()
                 when @cmds.moveRight  then @gui.moveRight()
+            return true
+        return false
 
-    forceUpdate: ->
-        @gui.forceUpdate()
+    update: (dt) ->
+        @gui.update(dt)
+        if not @gui.isBusy()
+            @step()
+
+    _forceUpdate: ->
+        while @step()
+            1
 
     pick: (fastForward) ->
         if fastForward
-            @forceUpdate()
+            @_forceUpdate()
         @queue.push @cmds.pick
 
     drop: (fastForward) ->
         if fastForward
-            @forceUpdate()
+            @_forceUpdate()
         @queue.push @cmds.drop
 
     moveLeft: (fastForward) ->
         if fastForward
-            @forceUpdate()
+            @_forceUpdate()
         @queue.push @cmds.moveLeft
 
     moveRight: (fastForward) ->
         if fastForward
-            @forceUpdate()
+            @_forceUpdate()
         @queue.push @cmds.moveRight

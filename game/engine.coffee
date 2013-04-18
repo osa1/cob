@@ -26,7 +26,6 @@ EngineModule = do ->
         return new Level getLevelData(stageStr), getLevelData(goalStr), 7 # FIXME: hard-coded
 
     arrEq = (arr1, arr2) ->
-        console.log arr1, arr2
         if arr1.length != arr2.length
             return false
 
@@ -121,32 +120,32 @@ EngineModule = do ->
                     return f
             return null
 
-        _cmdDown: (updateGui) ->
+        _cmdDown: (updateGui, forceUpdate) ->
             if @botBlock and @level.tryPush @botPos, @botBlock
                 @botBlock = null
                 if updateGui
-                    @gui.drop()
+                    @gui.drop forceUpdate
                 return true
             else if not @botBlock
                 popped = @level.tryPop @botPos
                 if popped
                     @botBlock = popped
                     if updateGui
-                        @gui.pick()
+                        @gui.pick forceUpdate
                     return true
 
-        _cmdMoveLeft: (updateGui) ->
+        _cmdMoveLeft: (updateGui, forceUpdate) ->
             if @botPos > 0
                 @botPos--
                 if updateGui
-                    @gui.moveLeft()
+                    @gui.moveLeft forceUpdate
                 return true
 
-        _cmdMoveRight: (updateGui) ->
+        _cmdMoveRight: (updateGui, forceUpdate) ->
             if @botPos < @level.getWidth() - 1
                 @botPos++
                 if updateGui
-                    @gui.moveRight()
+                    @gui.moveRight forceUpdate
                 return true
 
         _cmdCall: (funName) ->
@@ -162,8 +161,16 @@ EngineModule = do ->
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
 
         step: (args = {}) ->
-            updateGui   = args.updateGui || true
-            forceUpdate = args.forceUpdate || true
+            updateGui =
+                if not args.updateGui?
+                    true
+                else
+                    args.updateGui
+            forceUpdate =
+                if not args.forceUpdate?
+                    true
+                else
+                    args.forceUpdate
 
             if @ip > @currentFun.commands.length - 1
                 jmp = @callStack.pop()
@@ -179,22 +186,16 @@ EngineModule = do ->
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
-                    if @_cmdMoveLeft updateGui
-                        if forceUpdate
-                            @gui.forceUpdate()
+                    if @_cmdMoveLeft updateGui, forceUpdate
                         @history.push instr
                         @ip++
                 else if dir == "right"
-                    if @_cmdMoveRight updateGui
-                        if forceUpdate
-                            @gui.forceUpdate()
+                    if @_cmdMoveRight updateGui, forceUpdate
                         @history.push instr
                         @ip++
 
             else if instr.cmd == "down"
-                if @_cmdDown updateGui
-                        if forceUpdate
-                            @gui.forceUpdate()
+                if @_cmdDown updateGui, forceUpdate
                     @history.push instr
                     @ip++
 
@@ -209,25 +210,17 @@ EngineModule = do ->
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
-                    @_cmdMoveRight updateGui
-                    if updateGui
-                        @gui.forceUpdate()
+                    @_cmdMoveRight updateGui, true
                     @ip--
                 else if dir == "right"
-                    @_cmdMoveLeft updateGui
-                    if updateGui
-                        @gui.forceUpdate()
+                    @_cmdMoveLeft updateGui, true
                     @ip--
 
             else if instr.cmd == "down"
-                @_cmdDown updateGui
-                if updateGui
-                    @gui.forceUpdate()
+                @_cmdDown updateGui, true
                 @ip--
 
             else if instr.cmd == "call"
-                if updateGui
-                    @gui.forceUpdate()
                 @currentFun = @_lookupFun instr.from
                 @ip = instr.ip
 

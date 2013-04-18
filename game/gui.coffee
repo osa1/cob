@@ -72,7 +72,7 @@ GuiModule = do ->
             else
                 @busy = true
 
-        forceUpdate: ->
+        _forceUpdate: ->
             while @posx != @targetx or @posy != @targety
                 @posx = @targetx
                 @posy = @targety
@@ -152,7 +152,7 @@ GuiModule = do ->
                 @bot.targetx = col
                 @bot.targety = 0
                 @bot.posy = 0
-                @bot.forceUpdate()
+                @bot._forceUpdate()
 
         isBusy: ->
             @bot.busy
@@ -173,12 +173,11 @@ GuiModule = do ->
             if @drawBot
                 @bot.update dt
 
-        forceUpdate: ->
-            @bot.forceUpdate()
+        _forceUpdate: ->
+            @bot._forceUpdate()
 
-        # FIXME
         pick: =>
-            @forceUpdate()
+            @_forceUpdate()
 
             col = colOf @bot.posx
             @bot.moveTo @bot.posx, @maxBlockHeight - @map[col].length - 1
@@ -190,7 +189,7 @@ GuiModule = do ->
                         @busy = false
 
         drop: ->
-            @forceUpdate()
+            @_forceUpdate()
 
             col = colOf @bot.posx
             @bot.moveDelta 0, @maxBlockHeight - @map[col].length - 2
@@ -203,7 +202,7 @@ GuiModule = do ->
                         @busy = false
 
         moveLeft: ->
-            @forceUpdate()
+            @_forceUpdate()
 
             @bot.moveDelta -1, 0
             @bot.onComplete = =>
@@ -211,7 +210,7 @@ GuiModule = do ->
                     @busy = false
 
         moveRight: ->
-            @forceUpdate()
+            @_forceUpdate()
 
             @bot.moveDelta 1, 0
             @bot.onComplete = =>
