@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "utils.js",
+  "sourceRoot": "..",
+  "sources": [
+    "game/utils.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;CAAA,CAAA,CAAgB,CAAA,EAAV,GAAW;AACN,CAAP,GAAA;CACI,EAAqC,CAA3B,CAAA,OAAA,SAAO;MAFT;CAAhB,EAAgB;CAAhB"
+}
