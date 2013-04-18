@@ -170,7 +170,6 @@ GuiModule = do ->
 
         # FIXME
         pick: =>
-            console.log "gui.pick"
             @forceUpdate()
 
             col = colOf @bot.posx
@@ -183,7 +182,6 @@ GuiModule = do ->
                         @busy = false
 
         drop: ->
-            console.log "gui.drop"
             @forceUpdate()
 
             col = colOf @bot.posx
@@ -193,27 +191,22 @@ GuiModule = do ->
                 @bot.remove()
                 @bot.moveTo @bot.posx, 0
                 @bot.onComplete = =>
-                    console.log "drop completed"
                     @bot.onComplete = ->
                         @busy = false
 
         moveLeft: ->
-            console.log "gui.moveLeft"
             @forceUpdate()
 
             @bot.moveDelta -1, 0
             @bot.onComplete = =>
-                console.log "moveLeft completed"
                 @bot.onComplete = ->
                     @busy = false
 
         moveRight: ->
-            console.log "gui.moveRight"
             @forceUpdate()
 
             @bot.moveDelta 1, 0
             @bot.onComplete = =>
-                console.log "moveRight completed"
                 @bot.onComplete = ->
                     @busy = false
 

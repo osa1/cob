@@ -8,13 +8,11 @@ window.BotlangMode = do -> ->
         # but this looks more `normal`, maybe because color scheme
         if stream.peek() == "#"
             stream.skipToEnd()
-            console.log "comment"
             state.indent = stream.indentation()
             return "comment"
 
         if stream.sol()
             if stream.skipTo(':')
-                console.log "return cm-fun"
                 state.indent = stream.indentation() + 4
                 return "atom"
             else

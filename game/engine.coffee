@@ -105,7 +105,6 @@ EngineModule = do ->
             return null
 
         _cmdDown: (updateGui) ->
-            console.log @botPos, @botBlock
             if @botBlock and @level.tryPush @botPos, @botBlock
                 @botBlock = null
                 if updateGui
@@ -146,15 +145,10 @@ EngineModule = do ->
                 throw new Error "unimplemedted cmd: #{instr.cmd}"
 
         step: (updateGui = true) ->
-            if @debug
-                console.log "@ip: #{@ip}, @currentFun.commands.length: #{@currentFun.commands.length}"
-                console.log @currentFun
 
             if @ip > @currentFun.commands.length - 1
                 jmp = @callStack.pop()
                 if jmp
-                    console.log "jumping"
-                    console.log jmp
                     @history.push cmd: "call", function: jmp.from, from: @currentFun.id, ip: @ip
                     @currentFun = @_lookupFun jmp.from
                     @ip = jmp.ip
@@ -163,8 +157,6 @@ EngineModule = do ->
                     throw "halt"
 
             instr = @currentFun.commands[@ip]
-            console.log "intsr to run:"
-            console.log instr
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
