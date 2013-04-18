@@ -25,6 +25,23 @@ EngineModule = do ->
 
         return new Level getLevelData(stageStr), getLevelData(goalStr), 7 # FIXME: hard-coded
 
+    arrEq = (arr1, arr2) ->
+        console.log arr1, arr2
+        if arr1.length != arr2.length
+            return false
+
+        for colIdx in [0..arr1.length-1]
+            col1 = arr1[colIdx]
+            col2 = arr2[colIdx]
+            if col1.length != col2.length
+                return false
+
+            for rowIdx in [0..col1.length-1]
+                if col1[rowIdx] != col2[rowIdx]
+                    return false
+
+        return true
+
 
     class Level
 
@@ -203,6 +220,11 @@ EngineModule = do ->
                 while true
                     @step true
             catch error
+                if error == "halt"
+                    if arrEq @level.stage, @level.goal
+                        return "correct"
+                    else
+                        return "incorrect"
                 if error != "halt"
                     throw error
 
@@ -213,12 +235,13 @@ EngineModule = do ->
             catch error
                 if error == "halt" and @gui
                     @gui.setLevel @level.stage
+                    @gui.setBotPos @botPos
 
-                    bot = @gui.getBot()
-                    if bot
-                        bot.posx = @botPos
-                        bot.targetx = @botPos
-                        bot.posy = 0
+                    if arrEq @level.stage, @level.goal
+                        throw "correct"
+                    else
+                        throw "incorrect"
+
                 else if error != "halt"
                     throw error
 

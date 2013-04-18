@@ -17,6 +17,10 @@ class window.GuiTimer
     setLevel: (mapData) ->
         @gui.setLevel mapData
 
+    setBotPos: (col) ->
+        @gui.setBotPos col
+        @queue = []
+
     getBot: ->
         return @gui.bot
 

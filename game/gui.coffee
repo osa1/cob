@@ -146,6 +146,14 @@ GuiModule = do ->
             console.log @bot
             console.log @map
 
+        setBotPos: (col) ->
+            if @bot
+                @bot.posx = col
+                @bot.targetx = col
+                @bot.targety = 0
+                @bot.posy = 0
+                @bot.forceUpdate()
+
         isBusy: ->
             @bot.busy
 
