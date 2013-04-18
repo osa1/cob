@@ -206,6 +206,14 @@ EngineModule = do ->
                 @currentFun = @_lookupFun instr.from
                 @ip = instr.ip
 
+        run: ->
+            try
+                while true
+                    @step true
+            catch error
+                if error != "halt"
+                    throw error
+
         fastForward: ->
             try
                 while true
@@ -213,6 +221,12 @@ EngineModule = do ->
             catch error
                 if error == "halt" and @gui
                     @gui.setLevel @level.stage
+
+                    bot = @gui.getBot()
+                    if bot
+                        bot.posx = @botPos
+                        bot.targetx = @botPos
+                        bot.posy = 0
                 else if error != "halt"
                     throw error
 

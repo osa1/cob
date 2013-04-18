@@ -69,6 +69,8 @@ GuiModule = do ->
 
             if @targetx == @posx and @targety == @posy
                 @onComplete()
+            else
+                @busy = true
 
         forceUpdate: ->
             while @posx != @targetx or @posy != @targety
@@ -108,10 +110,6 @@ GuiModule = do ->
 
         constructor: (@internal, @maxBlockHeight, @botSpeed, @drawBot = true) ->
             @map = []
-
-            @internal.update = (dt) => @update dt
-            @internal.draw   =      => @draw()
-            @internal.run()
 
         setLevel: (mapData) ->
             @map = []
@@ -177,15 +175,12 @@ GuiModule = do ->
 
             col = colOf @bot.posx
             @bot.moveTo @bot.posx, @maxBlockHeight - @map[col].length - 1
-            @bot.busy = true
             @bot.onComplete = =>
                 @bot.attach @map[col].pop()
                 @bot.moveTo @bot.posx, 0
-                console.log @bot
                 @bot.onComplete = =>
-                    console.log "pick completed"
-                    @bot.busy = false
                     @bot.onComplete = ->
+                        @busy = false
 
         drop: ->
             console.log "gui.drop"
@@ -193,15 +188,14 @@ GuiModule = do ->
 
             col = colOf @bot.posx
             @bot.moveDelta 0, @maxBlockHeight - @map[col].length - 2
-            @bot.busy = true
             @bot.onComplete = =>
                 @map[col].push @bot.attachedTo
                 @bot.remove()
                 @bot.moveTo @bot.posx, 0
                 @bot.onComplete = =>
                     console.log "drop completed"
-                    @bot.busy = false
                     @bot.onComplete = ->
+                        @busy = false
 
         moveLeft: ->
             console.log "gui.moveLeft"
@@ -210,8 +204,8 @@ GuiModule = do ->
             @bot.moveDelta -1, 0
             @bot.onComplete = =>
                 console.log "moveLeft completed"
-                @bot.busy = false
                 @bot.onComplete = ->
+                    @busy = false
 
         moveRight: ->
             console.log "gui.moveRight"
@@ -220,8 +214,8 @@ GuiModule = do ->
             @bot.moveDelta 1, 0
             @bot.onComplete = =>
                 console.log "moveRight completed"
-                @bot.busy = false
                 @bot.onComplete = ->
+                    @busy = false
 
     Gui: Gui
 

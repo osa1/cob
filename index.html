@@ -16,6 +16,7 @@
     <div id="editor-controllers">
       <a id="load-link">Load</a>
       <a id="run-link">Run</a>
+      <a id="fast-forward">Fast-forward</a>
       <a id="step-link">Step</a>
       <a id="step-back-link">Step back</a>
     </div>
@@ -29,6 +30,7 @@
 
   <script src="game-js/engine.js"></script>
   <script src="game-js/gui.js"></script>
+  <script src="game-js/guitimer.js"></script>
 
   <!-- load the editor -->
   <script src="codemirror-compressed.js"></script>
@@ -51,6 +53,7 @@
     var stepBtn = id("step-link");
     var stepBackBtn = id("step-back-link");
     var loadBtn = id("load-link");
+    var fwBtn = id("fast-forward");
 
     var lvl;
     try {
@@ -82,7 +85,15 @@
     mainGuiInternal.MAX_BLOCKS_HEIGHT = 8;
     mainGuiInternal.BLOCK_WIDTH = mainGuiInternal.graphics.getWidth() / mainGuiInternal.MAX_BLOCKS_WIDTH;
     mainGuiInternal.BLOCK_HEIGHT = mainGuiInternal.graphics.getHeight() / mainGuiInternal.MAX_BLOCKS_HEIGHT;
-    var gui = new Gui(mainGuiInternal, 8, 1.5, true);
+    //var gui = new Gui(mainGuiInternal, 8, 1.5, true);
+    var gui = new GuiTimer(mainGuiInternal, 8, 1.5, true);
+    mainGuiInternal.update = function (dt) {
+      gui.update(dt);
+    };
+    mainGuiInternal.draw = function () {
+      gui.draw();
+    };
+    mainGuiInternal.run()
 
     // set up smaller gui to show target positions
     targetGuiInternal = Luv({
@@ -95,6 +106,13 @@
     targetGuiInternal.BLOCK_WIDTH = targetGuiInternal.graphics.getWidth() / targetGuiInternal.MAX_BLOCKS_WIDTH;
     targetGuiInternal.BLOCK_HEIGHT = targetGuiInternal.graphics.getHeight() / targetGuiInternal.MAX_BLOCKS_HEIGHT;
     var targetGui = new Gui(targetGuiInternal, 8, 1.5, false);
+    targetGuiInternal.update = function (dt) {
+      targetGui.update(dt);
+    };
+    targetGuiInternal.draw = function () {
+      targetGui.draw();
+    };
+    targetGuiInternal.run()
 
 
     var engine = new GameEngine(lvl, program, gui, targetGui, true)
@@ -111,6 +129,14 @@
 
     stepBackBtn.onclick = function () {
       engine.stepBack();
+    };
+
+    runBtn.onclick = function () {
+      engine.run();
+    };
+
+    fwBtn.onclick = function () {
+      engine.fastForward();
     };
 
     //Game.loadLevel([ "ggg", "rrr", "ggg", "rgb", "bgr", "rgb", "bbb", "rrr", "ggg", "rrr" ]);
