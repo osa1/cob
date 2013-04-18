@@ -6,19 +6,34 @@
     <title>Drawing and updating</title>
   </head>
   <body>
-    <div id="target">
-      <canvas id="target-canvas"></canvas>
-    </div>
-    <div id="game">
-      <canvas id="game-canvas"></canvas>
-    </div>
-    <div id="editor"> </div>
-    <div id="editor-controllers">
-      <a id="load-link">Load</a>
-      <a id="run-link">Run</a>
-      <a id="fast-forward">Fast-forward</a>
-      <a id="step-link">Step</a>
-      <a id="step-back-link">Step back</a>
+    <div class="content">
+      <div class="page-title">
+        <h1>CargoBot</h1>
+      </div>
+
+      <div class="level-loaders">
+        <p>Select a level:</p>
+        <select name="predefinedLevel" id="predefinedLevelSelect">
+          <option value="level1">level 1</option>
+        </select>
+        <p>or load from string:</p>
+        <input type="text" name="levelString" id="levelStringInput">
+      </div>
+
+      <div id="target">
+        <canvas id="target-canvas"></canvas>
+      </div>
+      <div id="game">
+        <canvas id="game-canvas"></canvas>
+      </div>
+      <div id="editor"></div>
+      <div id="editor-controllers">
+        <a id="load-link">Load</a>
+        <a id="run-link">Run</a>
+        <a id="fast-forward">Fast-forward</a>
+        <a id="step-link">Step</a>
+        <a id="step-back-link">Step back</a>
+      </div>
     </div>
   </body>
 
@@ -54,6 +69,17 @@
     var stepBackBtn = id("step-back-link");
     var loadBtn = id("load-link");
     var fwBtn = id("fast-forward");
+
+    var levelStringInput = id("levelStringInput");
+    var levelSelect = id("predefinedLevelSelect");
+    levelStringInput.onkeypress = function (arg) {
+      if (arg.which === 13) {
+        console.log("load new lvl");
+        var lvlData = levelStringInput.value;
+        var lvl = levelFromString(lvlData);
+        engine = new GameEngine(lvl, program, gui, targetGui, true)
+      }
+    };
 
     var lvl;
     try {

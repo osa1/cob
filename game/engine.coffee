@@ -3,8 +3,9 @@ EngineModule = do ->
     levelFromString = (string) ->
         parts = string.split("|")
         if parts.length != 2 or
-              parts[0].length % 5 != 0 or
-              parts[1].length % 5 != 0
+              parts[0].length % 7 != 0 or
+              parts[1].length % 7 != 0
+            console.log string
             throw { reason: "malformed string" }
 
         stageStr = parts[0]
@@ -12,8 +13,8 @@ EngineModule = do ->
 
         getLevelData = (string) ->
             level = []
-            for i in [0..string.length/5-1]
-                col = string.slice i * 5, (i + 1) * 5
+            for i in [0..string.length/7-1]
+                col = string.slice i * 7, (i + 1) * 7
                 levelCol = []
                 for cidx in [0..col.length-1]
                     char = col[cidx]

@@ -4,19 +4,35 @@ body {
   margin: 0 auto 0 auto;
 
   color: rgb(56, 54, 23);
-  font-size: 16px;
+  font-size: 1.5em;
   font-family: sans-serif;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+div.content {
+  background-color: #FFFFFF;
+  color: #595A61;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+}
+
+div.page-title, div.level-loaders {
+  margin-left: 10px;
+  margin-bottom: 10px;
 }
 
 div#target, div#game, div#editor-controllers {
-  background-color: #53777A;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
   border-color: white;
 }
 
 div#editor {
   margin-top: 1.5em;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  font-size: 0.7em;
 }
 
 div#editor-controllers {
