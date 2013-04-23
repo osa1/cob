@@ -2,6 +2,21 @@
 (function() {
   window.BotlangMode = (function() {
     return function() {
+      var builtins, keywords, words;
+
+      words = function(str) {
+        var obj, w, _i, _len, _words;
+
+        obj = {};
+        _words = str.split(" ");
+        for (_i = 0, _len = _words.length; _i < _len; _i++) {
+          w = _words[_i];
+          obj[w] = true;
+        }
+        return obj;
+      };
+      keywords = words("if");
+      builtins = words("red green blue holding");
       return {
         startState: function() {
           return {
@@ -9,21 +24,34 @@
           };
         },
         token: function(stream, state) {
-          if (stream.peek() === "#") {
-            stream.skipToEnd();
+          var ch, cur;
+
+          if (stream.sol()) {
             state.indent = stream.indentation();
+          }
+          if (stream.eatSpace()) {
+            return null;
+          }
+          ch = stream.next();
+          if (ch === "#") {
+            stream.skipToEnd();
             return "comment";
           }
-          if (stream.sol()) {
-            if (stream.skipTo(':')) {
-              state.indent = stream.indentation() + 4;
-              return "atom";
-            } else {
-              state.indent = stream.indentation();
-            }
+          stream.eatWhile(/[\w\$_\:]/);
+          cur = stream.current();
+          if ((cur.charAt(cur.length - 1)) === ":") {
+            state.indent += 4;
+            return "variable";
           }
-          stream.next();
-          return "fun";
+          if (keywords.propertyIsEnumerable(cur)) {
+            state.indent += 4;
+            return "keyword";
+          }
+          if (builtins.propertyIsEnumerable(cur)) {
+            console.log("builtin");
+            return "builtin";
+          }
+          return "atom";
         },
         indent: function(state, textAfter) {
           return state.indent;

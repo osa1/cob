@@ -205,8 +205,13 @@
       };
 
       Gui.prototype.draw = function() {
-        var col, row, _i, _j, _len, _len1, _ref;
+        var col, mapWidth, row, _i, _j, _len, _len1, _ref;
 
+        this.internal.graphics.setColor("15BDBA");
+        mapWidth = this.map.length * this.internal.BLOCK_WIDTH;
+        this.internal.graphics.translate((this.internal.graphics.getWidth() - mapWidth) / 2, 0);
+        this.internal.graphics.line(0, 0, 0, this.internal.graphics.getHeight());
+        this.internal.graphics.line(mapWidth + this.internal.BLOCK_MARGIN, 0, mapWidth + this.internal.BLOCK_MARGIN, this.internal.graphics.getHeight());
         _ref = this.map;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           col = _ref[_i];
