@@ -158,6 +158,12 @@ GuiModule = do ->
             @bot.busy
 
         draw: ->
+            @internal.graphics.setColor "15BDBA"
+            mapWidth = @map.length * @internal.BLOCK_WIDTH
+            @internal.graphics.translate ((@internal.graphics.getWidth() - mapWidth) / 2), 0
+            @internal.graphics.line 0, 0, 0, @internal.graphics.getHeight()
+            @internal.graphics.line mapWidth + @internal.BLOCK_MARGIN, 0, mapWidth + @internal.BLOCK_MARGIN, @internal.graphics.getHeight()
+
             for col in @map
                 for row in col
                     row.draw()

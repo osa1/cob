@@ -110,6 +110,7 @@
     mainGuiInternal.MAX_BLOCKS_WIDTH = 10;
     mainGuiInternal.MAX_BLOCKS_HEIGHT = 8;
     mainGuiInternal.BLOCK_WIDTH = mainGuiInternal.graphics.getWidth() / mainGuiInternal.MAX_BLOCKS_WIDTH;
+    mainGuiInternal.BLOCK_MARGIN = mainGuiInternal.graphics.getWidth() * 2 / 100
     mainGuiInternal.BLOCK_HEIGHT = mainGuiInternal.graphics.getHeight() / mainGuiInternal.MAX_BLOCKS_HEIGHT;
     //var gui = new Gui(mainGuiInternal, 8, 1.5, true);
     var gui = new GuiTimer(mainGuiInternal, 8, 1.5, true);
@@ -130,6 +131,7 @@
     targetGuiInternal.MAX_BLOCKS_WIDTH = 10;
     targetGuiInternal.MAX_BLOCKS_HEIGHT = 8;
     targetGuiInternal.BLOCK_WIDTH = targetGuiInternal.graphics.getWidth() / targetGuiInternal.MAX_BLOCKS_WIDTH;
+    targetGuiInternal.BLOCK_MARGIN = targetGuiInternal.graphics.getWidth() * 2 / 100
     targetGuiInternal.BLOCK_HEIGHT = targetGuiInternal.graphics.getHeight() / targetGuiInternal.MAX_BLOCKS_HEIGHT;
     var targetGui = new Gui(targetGuiInternal, 8, 1.5, false);
     targetGuiInternal.update = function (dt) {
