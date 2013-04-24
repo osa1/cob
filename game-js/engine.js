@@ -176,7 +176,7 @@
           if (updateGui) {
             this.gui.drop(forceUpdate);
           }
-          return true;
+          return this.ip++;
         } else if (!this.botBlock) {
           popped = this.level.tryPop(this.botPos);
           if (popped) {
@@ -184,8 +184,12 @@
             if (updateGui) {
               this.gui.pick(forceUpdate);
             }
-            return true;
+            return this.ip++;
+          } else {
+            throw new Error("column is emmpty!");
           }
+        } else {
+          throw new Error("column is full!");
         }
       };
 
@@ -195,7 +199,9 @@
           if (updateGui) {
             this.gui.moveLeft(forceUpdate);
           }
-          return true;
+          return this.ip++;
+        } else {
+          throw new Error("moving out of map!");
         }
       };
 
@@ -205,7 +211,9 @@
           if (updateGui) {
             this.gui.moveRight(forceUpdate);
           }
-          return true;
+          return this.ip++;
+        } else {
+          throw new Error("moving out of map!");
         }
       };
 
@@ -263,21 +271,15 @@
         if (instr.cmd === "move") {
           dir = instr.dir;
           if (dir === "left") {
-            if (this._cmdMoveLeft(updateGui, forceUpdate)) {
-              this.history.push(instr);
-              return this.ip++;
-            }
+            this._cmdMoveLeft(updateGui, forceUpdate);
+            return this.history.push(instr);
           } else if (dir === "right") {
-            if (this._cmdMoveRight(updateGui, forceUpdate)) {
-              this.history.push(instr);
-              return this.ip++;
-            }
+            this._cmdMoveRight(updateGui, forceUpdate);
+            return this.history.push(instr);
           }
         } else if (instr.cmd === "down") {
-          if (this._cmdDown(updateGui, forceUpdate)) {
-            this.history.push(instr);
-            return this.ip++;
-          }
+          this._cmdDown(updateGui, forceUpdate);
+          return this.history.push(instr);
         } else if (instr.cmd === "call") {
           return this._cmdCall(instr["function"]);
         }
