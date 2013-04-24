@@ -126,28 +126,37 @@ EngineModule = do ->
                 @botBlock = null
                 if updateGui
                     @gui.drop forceUpdate
-                return true
+                @ip++
             else if not @botBlock
                 popped = @level.tryPop @botPos
                 if popped
                     @botBlock = popped
                     if updateGui
                         @gui.pick forceUpdate
-                    return true
+                    @ip++
+                else
+                    throw new Error "column is emmpty!"
+
+            else
+                throw new Error "column is full!"
 
         _cmdMoveLeft: (updateGui, forceUpdate) ->
             if @botPos > 0
                 @botPos--
                 if updateGui
                     @gui.moveLeft forceUpdate
-                return true
+                @ip++
+            else
+                throw new Error "moving out of map!"
 
         _cmdMoveRight: (updateGui, forceUpdate) ->
             if @botPos < @level.getWidth() - 1
                 @botPos++
                 if updateGui
                     @gui.moveRight forceUpdate
-                return true
+                @ip++
+            else
+                throw new Error "moving out of map!"
 
         _cmdCall: (funName) ->
             fun = @_lookupFun funName
@@ -189,18 +198,15 @@ EngineModule = do ->
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
-                    if @_cmdMoveLeft updateGui, forceUpdate
-                        @history.push instr
-                        @ip++
+                    @_cmdMoveLeft updateGui, forceUpdate
+                    @history.push instr
                 else if dir == "right"
-                    if @_cmdMoveRight updateGui, forceUpdate
-                        @history.push instr
-                        @ip++
+                    @_cmdMoveRight updateGui, forceUpdate
+                    @history.push instr
 
             else if instr.cmd == "down"
-                if @_cmdDown updateGui, forceUpdate
-                    @history.push instr
-                    @ip++
+                @_cmdDown updateGui, forceUpdate
+                @history.push instr
 
             else if instr.cmd == "call"
                 @_cmdCall instr.function
