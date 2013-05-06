@@ -1,5 +1,6 @@
-GAME_SOURCE = "game"
-GAME_OUTPUT = "game-js"
+COFFEE_SOURCE  = "game"
+JS_SOURCE      = "js"
+GAME_OUTPUT    = "game-js"
 BOTLANG_SOURCE = "botlang"
 BOTLANG_OUTPUT = "botlang"
 
@@ -19,13 +20,17 @@ setStreams = (p) ->
 
 task 'build:game', 'rebuild the game', (options) ->
   mkTargetDir()
-  for file in fs.readdirSync GAME_SOURCE
+  for file in fs.readdirSync COFFEE_SOURCE
     if (path.extname file) == '.coffee'
-      setStreams(cp.spawn 'coffee', [ '-c', '-m', '-o', GAME_OUTPUT, (path.join GAME_SOURCE, file) ])
+      setStreams(cp.spawn 'coffee', [ '-c', '-m', '-o', GAME_OUTPUT, (path.join COFFEE_SOURCE, file) ])
+  for file in fs.readdirSync JS_SOURCE
+    if (path.extname file) == '.js'
+      setStreams(cp.spawn 'cp', [ (path.join JS_SOURCE, file), (path.join GAME_OUTPUT, file) ])
+
 
 task 'build:parser', 'rebuild the parser', (options) ->
   mkTargetDir()
-  setStreams(cp.spawn 'pegjs', [ "-e", "parser", (path.join GAME_SOURCE, 'parser.pegjs'), (path.join GAME_OUTPUT, 'parser.js') ])
+  setStreams(cp.spawn 'pegjs', [ "-e", "parser", (path.join COFFEE_SOURCE, 'parser.pegjs'), (path.join GAME_OUTPUT, 'parser.js') ])
 
 task 'build:botlang', 'rebuild botlang module for CodeMirror', (options) ->
   setStreams(cp.spawn 'coffee', [ '-c', '-m', '-o', BOTLANG_OUTPUT, (path.join BOTLANG_SOURCE, 'mode.coffee') ])
