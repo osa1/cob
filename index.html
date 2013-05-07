@@ -42,6 +42,7 @@
 
   <script src="game-js/utils.js"></script>
   <script src="game-js/world.js"></script>
+  <script src="game-js/levels.js"></script>
 
   <script src="game-js/engine.js"></script>
   <script src="game-js/gui.js"></script>
@@ -91,10 +92,12 @@
       }
     } catch (e) {
       console.log("error while creating from the query.");
-      lvl = new Level(
-        [["b", "b", "b"], [], ["r", "r", "r"]],
-        [[], ["b", "r", "b", "r", "b", "r"], []],
-        7); // FIXME: hard-coded level height
+      lvl = new Level({
+        stage: levels[0].stage,
+        goal: levels[0].goal,
+        toolbox: levels[0].toolbox,
+        hint: levels[0].hint
+      });
     }
 
     console.log(lvl);
