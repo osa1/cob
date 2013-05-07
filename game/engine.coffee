@@ -18,8 +18,19 @@ EngineModule = do ->
                 levelCol = []
                 for cidx in [0..col.length-1]
                     char = col[cidx]
-                    if char != '-'
-                        levelCol.push char
+                    # TODO: this part is not tested
+                    strToPush = null
+                    strToPush =
+                        if char == "r"
+                            "red"
+                        else if char == "g"
+                            "green"
+                        else if char == "b"
+                            "blue"
+                        else if char == "y"
+                            "yellow"
+                    if strToPush
+                        levelCol.push strToPush
                 level.push levelCol
 
             return level
