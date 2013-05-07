@@ -53,15 +53,34 @@ EngineModule = do ->
 
         return true
 
+    search = (val, arr) ->
+        for i in [0..arr.length - 1]
+            if arr[i] == val
+                return i
+        return null
+
 
     class Level
 
-        constructor: (@stage, @goal, @maxHeight = 0) ->
+        constructor: (args) ->
+            @stage     = args.stage
+            @goal      = args.goal
+            @toolbox   = args.toolbox
+            @hint      = args.hint
+            @maxHeight = args.maxHeight
+
             if @stage.length != @goal.length
                 throw { err: "Level can't created", reason: "stage and goal lengths are not equal" }
 
             for col in @stage
                 @maxHeight = Math.max @maxHeight, col.length
+
+        #constructor: (@stage, @goal, @toolbox, @hint, @maxHeight = 0) ->
+            #if @stage.length != @goal.length
+                #throw { err: "Level can't created", reason: "stage and goal lengths are not equal" }
+
+            #for col in @stage
+                #@maxHeight = Math.max @maxHeight, col.length
 
         getWidth: ->
             return @stage.length
@@ -104,6 +123,21 @@ EngineModule = do ->
 
         constructor: (@level, @program, @gui, @targetGui, @debug = false) ->
             assert @program.length != 0, "programs should have at least one function."
+
+            for func in @program
+                for stmt in func.commands
+                    if stmt.cmd == "move"
+                        if stmt.dir == "left" and (search "left", @level.toolbox) == null
+                            throw Error "left is not in toolbox"
+                        else if stmt.dir == "right" and (search "right", @level.toolbox) == null
+                            console.log @level.toolbox
+                            throw Error "right is not in toolbox"
+                    else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
+                        throw Error "down is not in toolbox"
+
+            funLength = @program.length
+            if (search "f" + funLength, @level.toolbox) == null
+                throw Error "too many functions"
 
             if @gui
                 @gui.setLevel @level.stage
