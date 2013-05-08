@@ -3,7 +3,7 @@
   var EngineModule;
 
   EngineModule = (function() {
-    var GameEngine, Level, arrEq, levelFromString;
+    var GameEngine, Level, arrEq, levelFromString, search;
 
     levelFromString = function(string) {
       var getLevelData, goalStr, parts, stageStr;
@@ -18,7 +18,7 @@
       stageStr = parts[0];
       goalStr = parts[1];
       getLevelData = function(string) {
-        var char, cidx, col, i, level, levelCol, _i, _j, _ref, _ref1;
+        var char, cidx, col, i, level, levelCol, strToPush, _i, _j, _ref, _ref1;
 
         level = [];
         for (i = _i = 0, _ref = string.length / 7 - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
@@ -26,8 +26,10 @@
           levelCol = [];
           for (cidx = _j = 0, _ref1 = col.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; cidx = 0 <= _ref1 ? ++_j : --_j) {
             char = col[cidx];
-            if (char !== '-') {
-              levelCol.push(char);
+            strToPush = null;
+            strToPush = char === "r" ? "red" : char === "g" ? "green" : char === "b" ? "blue" : char === "y" ? "yellow" : void 0;
+            if (strToPush) {
+              levelCol.push(strToPush);
             }
           }
           level.push(levelCol);
@@ -56,13 +58,25 @@
       }
       return true;
     };
+    search = function(val, arr) {
+      var i, _i, _ref;
+
+      for (i = _i = 0, _ref = arr.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        if (arr[i] === val) {
+          return i;
+        }
+      }
+      return null;
+    };
     Level = (function() {
-      function Level(stage, goal, maxHeight) {
+      function Level(args) {
         var col, _i, _len, _ref;
 
-        this.stage = stage;
-        this.goal = goal;
-        this.maxHeight = maxHeight != null ? maxHeight : 0;
+        this.stage = args.stage;
+        this.goal = args.goal;
+        this.toolbox = args.toolbox;
+        this.hint = args.hint;
+        this.maxHeight = args.maxHeight;
         if (this.stage.length !== this.goal.length) {
           throw {
             err: "Level can't created",
@@ -128,12 +142,35 @@
     })();
     GameEngine = (function() {
       function GameEngine(level, program, gui, targetGui, debug) {
+        var funLength, func, stmt, _i, _j, _len, _len1, _ref, _ref1;
+
         this.level = level;
         this.program = program;
         this.gui = gui;
         this.targetGui = targetGui;
         this.debug = debug != null ? debug : false;
-        assert(this.program.length !== 0, "programs should have at least one function.");
+        _ref = this.program;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          func = _ref[_i];
+          _ref1 = func.commands;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            stmt = _ref1[_j];
+            if (stmt.cmd === "move") {
+              if (stmt.dir === "left" && (search("left", this.level.toolbox)) === null) {
+                throw Error("left is not in toolbox");
+              } else if (stmt.dir === "right" && (search("right", this.level.toolbox)) === null) {
+                console.log(this.level.toolbox);
+                throw Error("right is not in toolbox");
+              }
+            } else if (stmt.cmd === "down" && (search("pickup", this.level.toolbox)) === null) {
+              throw Error("down is not in toolbox");
+            }
+          }
+        }
+        funLength = this.program.length;
+        if (funLength !== 0 && (search("f" + funLength, this.level.toolbox)) === null) {
+          throw Error("too many functions");
+        }
         if (this.gui) {
           this.gui.setLevel(this.level.stage);
         } else {

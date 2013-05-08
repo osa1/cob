@@ -173,7 +173,7 @@
               if (row === null) {
                 break;
               } else {
-                color = row === "r" ? [255, 0, 0] : row === "g" ? [0, 255, 0] : row === "b" ? [0, 0, 255] : [255, 234, 173];
+                color = row === "red" ? [255, 0, 0] : row === "green" ? [0, 255, 0] : row === "blue" ? [0, 0, 255] : row === "yellow" ? [249, 246, 49] : [255, 234, 173];
                 posx = colIdx;
                 posy = this.maxBlockHeight - rowIdx - 1;
                 block = new Block(this.internal, posx, posy, color);
