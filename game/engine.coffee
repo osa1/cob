@@ -122,8 +122,9 @@ EngineModule = do ->
     class GameEngine
 
         constructor: (@level, @program, @gui, @targetGui, @debug = false) ->
-            assert @program.length != 0, "programs should have at least one function."
+            #assert @program.length != 0, "programs should have at least one function."
 
+            # check for forbidden commands
             for func in @program
                 for stmt in func.commands
                     if stmt.cmd == "move"
@@ -135,8 +136,9 @@ EngineModule = do ->
                     else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
                         throw Error "down is not in toolbox"
 
+            # check for function count
             funLength = @program.length
-            if (search "f" + funLength, @level.toolbox) == null
+            if funLength != 0 and (search "f" + funLength, @level.toolbox) == null
                 throw Error "too many functions"
 
             if @gui
