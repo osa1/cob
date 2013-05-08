@@ -123,12 +123,14 @@ GuiModule = do ->
                             break
                         else
                             color =
-                                if row == "r"
+                                if row == "red"
                                     [ 255, 0, 0 ]
-                                else if row == "g"
+                                else if row == "green"
                                     [ 0, 255, 0 ]
-                                else if row == "b"
+                                else if row == "blue"
                                     [ 0, 0, 255 ]
+                                else if row == "yellow"
+                                    [ 249, 246, 49 ]
                                 else
                                     [ 255, 234, 173 ]
 

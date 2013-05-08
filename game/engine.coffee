@@ -18,8 +18,19 @@ EngineModule = do ->
                 levelCol = []
                 for cidx in [0..col.length-1]
                     char = col[cidx]
-                    if char != '-'
-                        levelCol.push char
+                    # TODO: this part is not tested
+                    strToPush = null
+                    strToPush =
+                        if char == "r"
+                            "red"
+                        else if char == "g"
+                            "green"
+                        else if char == "b"
+                            "blue"
+                        else if char == "y"
+                            "yellow"
+                    if strToPush
+                        levelCol.push strToPush
                 level.push levelCol
 
             return level
@@ -42,15 +53,34 @@ EngineModule = do ->
 
         return true
 
+    search = (val, arr) ->
+        for i in [0..arr.length - 1]
+            if arr[i] == val
+                return i
+        return null
+
 
     class Level
 
-        constructor: (@stage, @goal, @maxHeight = 0) ->
+        constructor: (args) ->
+            @stage     = args.stage
+            @goal      = args.goal
+            @toolbox   = args.toolbox
+            @hint      = args.hint
+            @maxHeight = args.maxHeight
+
             if @stage.length != @goal.length
                 throw { err: "Level can't created", reason: "stage and goal lengths are not equal" }
 
             for col in @stage
                 @maxHeight = Math.max @maxHeight, col.length
+
+        #constructor: (@stage, @goal, @toolbox, @hint, @maxHeight = 0) ->
+            #if @stage.length != @goal.length
+                #throw { err: "Level can't created", reason: "stage and goal lengths are not equal" }
+
+            #for col in @stage
+                #@maxHeight = Math.max @maxHeight, col.length
 
         getWidth: ->
             return @stage.length
@@ -92,7 +122,24 @@ EngineModule = do ->
     class GameEngine
 
         constructor: (@level, @program, @gui, @targetGui, @debug = false) ->
-            assert @program.length != 0, "programs should have at least one function."
+            #assert @program.length != 0, "programs should have at least one function."
+
+            # check for forbidden commands
+            for func in @program
+                for stmt in func.commands
+                    if stmt.cmd == "move"
+                        if stmt.dir == "left" and (search "left", @level.toolbox) == null
+                            throw Error "left is not in toolbox"
+                        else if stmt.dir == "right" and (search "right", @level.toolbox) == null
+                            console.log @level.toolbox
+                            throw Error "right is not in toolbox"
+                    else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
+                        throw Error "down is not in toolbox"
+
+            # check for function count
+            funLength = @program.length
+            if funLength != 0 and (search "f" + funLength, @level.toolbox) == null
+                throw Error "too many functions"
 
             if @gui
                 @gui.setLevel @level.stage

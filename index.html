@@ -42,6 +42,7 @@
 
   <script src="game-js/utils.js"></script>
   <script src="game-js/world.js"></script>
+  <script src="game-js/levels.js"></script>
 
   <script src="game-js/engine.js"></script>
   <script src="game-js/gui.js"></script>
@@ -81,6 +82,12 @@
       }
     };
 
+
+    for (var i = 0; i < levels.length; i++) {
+      var level = levels[i];
+      levelSelect.options[levelSelect.options.length] = new Option(level.name, level.name);
+    }
+
     var lvl;
     try {
       var query = window.location.search;
@@ -91,13 +98,33 @@
       }
     } catch (e) {
       console.log("error while creating from the query.");
-      lvl = new Level(
-        [["b", "b", "b"], [], ["r", "r", "r"]],
-        [[], ["b", "r", "b", "r", "b", "r"], []],
-        7); // FIXME: hard-coded level height
+      lvl = new Level({
+        stage: levels[0].stage,
+        goal: levels[0].goal,
+        toolbox: levels[0].toolbox,
+        hint: levels[0].hint
+      });
     }
 
     console.log(lvl);
+
+    levelSelect.onchange = function () {
+      var levelName = (levelSelect.options[levelSelect.selectedIndex]).value;
+
+      for (var i = 0; i < levels.length; i++) {
+        var level = levels[i];
+        if (level.name == levelName) {
+          lvl = new Level({
+            stage: level.stage,
+            goal: level.goal,
+            toolbox: level.toolbox,
+            hint: level.hint
+          });
+          engine = new GameEngine(lvl, [], gui, targetGui, true)
+        }
+      }
+
+    };
 
     var program = parser.parse("main:");
 
