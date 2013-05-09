@@ -127,14 +127,7 @@ EngineModule = do ->
             # check for forbidden commands
             for func in @program
                 for stmt in func.commands
-                    if stmt.cmd == "move"
-                        if stmt.dir == "left" and (search "left", @level.toolbox) == null
-                            throw Error "left is not in toolbox"
-                        else if stmt.dir == "right" and (search "right", @level.toolbox) == null
-                            console.log @level.toolbox
-                            throw Error "right is not in toolbox"
-                    else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
-                        throw Error "down is not in toolbox"
+                    @_checkCmdInToolbox stmt
 
             # check for function count
             funLength = @program.length
@@ -161,6 +154,20 @@ EngineModule = do ->
             # bot state
             @botPos     = Math.floor @level.getWidth() / 2
             @botBlock   = null
+
+        _checkCmdInToolbox: (stmt) ->
+            if stmt.cmd == "move"
+                if stmt.dir == "left" and (search "left", @level.toolbox) == null
+                    throw Error "left is not in toolbox"
+                else if stmt.dir == "right" and (search "right", @level.toolbox) == null
+                    console.log @level.toolbox
+                    throw Error "right is not in toolbox"
+            else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
+                throw Error "down is not in toolbox"
+            else if stmt.cmd == "conditional" and (search stmt.guard, @level.toolbox) == null
+                throw Error (stmt.guard + " is not in toolbox")
+            else if stmt.cmd == "conditional"
+                @_checkCmdInToolbox stmt.body
 
         _lookupFun: (funName) ->
             for f in @program
