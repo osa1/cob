@@ -242,6 +242,9 @@ EngineModule = do ->
                     throw "halt"
 
             instr = @currentFun.commands[@ip]
+            @runInstr instr, updateGui, forceUpdate
+
+        runInstr: (instr, updateGui, forceUpdate) ->
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
@@ -257,6 +260,12 @@ EngineModule = do ->
 
             else if instr.cmd == "call"
                 @_cmdCall instr.function
+
+            else if instr.cmd == "conditional"
+                if instr.guard == @botBlock
+                    @runInstr instr.body, updateGui, forceUpdate
+                else
+                    @ip++
 
         stepBack: (updateGui = true) ->
             instr = @history.pop()

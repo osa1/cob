@@ -29,5 +29,10 @@ command
       { return { cmd: 'down' }; }
   / ws* "call" ws+ id:id
       { return { cmd: 'call', function: id }; }
+  / ws* "if" ws+ guard:guard ws+ body:command
+      { return { cmd: 'conditional', guard: guard, body: body }; }
+
+guard
+  = "red" / "green" / "blue" / "yellow"
 
 dir = "left" / "right"
