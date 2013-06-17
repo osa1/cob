@@ -11,7 +11,7 @@ ws
   / SingleLineComment
 
 id
-  = id:[A-Za-z0-9]+
+  = id:[A-Za-z0-9_]+
       { return id.join(""); }
 
 functions
