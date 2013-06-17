@@ -53,12 +53,6 @@ EngineModule = do ->
 
         return true
 
-    search = (val, arr) ->
-        for i in [0..arr.length - 1]
-            if arr[i] == val
-                return i
-        return null
-
 
     class Level
 
@@ -131,7 +125,7 @@ EngineModule = do ->
 
             # check for function count
             funLength = @program.length
-            if funLength != 0 and (search "f" + funLength, @level.toolbox) == null
+            if funLength != 0 and (@level.toolbox.search "f" + funLength) == null
                 throw Error "too many functions"
 
             if @gui
@@ -157,14 +151,14 @@ EngineModule = do ->
 
         _checkCmdInToolbox: (stmt) ->
             if stmt.cmd == "move"
-                if stmt.dir == "left" and (search "left", @level.toolbox) == null
+                if stmt.dir == "left" and (@level.toolbox.search "left") == null
                     throw Error "left is not in toolbox"
-                else if stmt.dir == "right" and (search "right", @level.toolbox) == null
+                else if stmt.dir == "right" and (@level.toolbox.search "right") == null
                     console.log @level.toolbox
                     throw Error "right is not in toolbox"
-            else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
+            else if stmt.cmd == "down" and (@level.toolbox.search "pickup") == null
                 throw Error "down is not in toolbox"
-            else if stmt.cmd == "conditional" and (search stmt.guard, @level.toolbox) == null
+            else if stmt.cmd == "conditional" and (@level.toolbox.search stmt.guard) == null
                 throw Error (stmt.guard + " is not in toolbox")
             else if stmt.cmd == "conditional"
                 @_checkCmdInToolbox stmt.body
