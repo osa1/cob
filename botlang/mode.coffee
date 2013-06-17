@@ -8,7 +8,7 @@ window.BotlangMode = do -> ->
         return obj
 
     keywords = words "if"
-    builtins = words "red green blue holding"
+    builtins = words "red green blue yellow holding"
 
     startState: ->
         return indent: 0

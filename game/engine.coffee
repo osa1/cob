@@ -53,12 +53,6 @@ EngineModule = do ->
 
         return true
 
-    search = (val, arr) ->
-        for i in [0..arr.length - 1]
-            if arr[i] == val
-                return i
-        return null
-
 
     class Level
 
@@ -127,18 +121,11 @@ EngineModule = do ->
             # check for forbidden commands
             for func in @program
                 for stmt in func.commands
-                    if stmt.cmd == "move"
-                        if stmt.dir == "left" and (search "left", @level.toolbox) == null
-                            throw Error "left is not in toolbox"
-                        else if stmt.dir == "right" and (search "right", @level.toolbox) == null
-                            console.log @level.toolbox
-                            throw Error "right is not in toolbox"
-                    else if stmt.cmd == "down" and (search "pickup", @level.toolbox) == null
-                        throw Error "down is not in toolbox"
+                    @_checkCmdInToolbox stmt
 
             # check for function count
             funLength = @program.length
-            if funLength != 0 and (search "f" + funLength, @level.toolbox) == null
+            if funLength != 0 and (@level.toolbox.search "f" + funLength) == null
                 throw Error "too many functions"
 
             if @gui
@@ -161,6 +148,20 @@ EngineModule = do ->
             # bot state
             @botPos     = Math.floor @level.getWidth() / 2
             @botBlock   = null
+
+        _checkCmdInToolbox: (stmt) ->
+            if stmt.cmd == "move"
+                if stmt.dir == "left" and (@level.toolbox.search "left") == null
+                    throw Error "left is not in toolbox"
+                else if stmt.dir == "right" and (@level.toolbox.search "right") == null
+                    console.log @level.toolbox
+                    throw Error "right is not in toolbox"
+            else if stmt.cmd == "down" and (@level.toolbox.search "pickup") == null
+                throw Error "down is not in toolbox"
+            else if stmt.cmd == "conditional" and (@level.toolbox.search stmt.guard) == null
+                throw Error (stmt.guard + " is not in toolbox")
+            else if stmt.cmd == "conditional"
+                @_checkCmdInToolbox stmt.body
 
         _lookupFun: (funName) ->
             for f in @program
@@ -242,6 +243,9 @@ EngineModule = do ->
                     throw "halt"
 
             instr = @currentFun.commands[@ip]
+            @runInstr instr, updateGui, forceUpdate
+
+        runInstr: (instr, updateGui, forceUpdate) ->
             if instr.cmd == "move"
                 dir = instr.dir
                 if dir == "left"
@@ -257,6 +261,12 @@ EngineModule = do ->
 
             else if instr.cmd == "call"
                 @_cmdCall instr.function
+
+            else if instr.cmd == "conditional"
+                if instr.guard == @botBlock
+                    @runInstr instr.body, updateGui, forceUpdate
+                else
+                    @ip++
 
         stepBack: (updateGui = true) ->
             instr = @history.pop()
