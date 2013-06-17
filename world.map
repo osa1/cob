@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "world.js",
+  "sourceRoot": "",
+  "sources": [
+    "game/world.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;CAAA,CAAA,CAAkB,GAAZ,EAAN,CAAmB;CACX,CAA+D,CAAhE,KAAS,GAAZ,CAAA,CAAA;CADJ,EAAkB;;CAAlB,CAGA,CAAe,CAAI,CAAnB,CAAM;;CAHN,CAKA,CAAe,CAAI,CAAnB,CAAM;CALN"
+}

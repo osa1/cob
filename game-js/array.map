@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "array.js",
+  "sourceRoot": "..",
+  "sources": [
+    "game/array.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;CAAA,CAAA,CAAyB,CAAA,CAApB,CAAL,GAAe;CACX,GAAA,IAAA;CAAA,CAAgB,CAAT,CAAP,CAAO,CAAA;CAAP,EAEO,CADP,EAAA;CAKA,CAAyB,EAAjB,CAAD,MAAA;CAPX,EAAyB;;CAAzB,CASA,CAAyB,EAApB,CAAL,GAAe;CACX,OAAA,GAAA;AAAA,CAAA,EAAA,MAAS,2FAAT;CACI,EAAA,CAAG,CAAQ,CAAX;CACI,cAAO;QAFf;CAAA,IAAA;CAGA,GAAA,OAAO;CAbX,EASyB;CATzB"
+}
